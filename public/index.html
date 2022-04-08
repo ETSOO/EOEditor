@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <base href="./" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="description" content="ETSOO Free WYSIWYG HTML Editor" />
+        <title>EOEditor</title>
+        <script src="eoeditor.js"></script>
+        <style>
+            h2.red {
+                color: #ff0000;
+            }
+            h2.blue {
+                color: #0000ff;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>EOEditor 2022</h1>
+        <form
+            onsubmit="document.querySelector('eo-editor').name = 'newName'; return false;"
+        >
+            <eo-editor name="description" language="zh-CN">
+                <p>Editor content: <b>Hello, world!</b></p>
+                <h2>H2 Text</h2>
+                <p>
+                    亿速思维网站：<a href="https://www.etsoo.com">etsoo.com</a>
+                </p>
+                <table width="100%">
+                    <thead>
+                        <tr>
+                            <th>TH1</th>
+                            <th colspan="2">TH2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">Row1</td>
+                            <td rowspan="3">TD 2</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">Row2</td>
+                            <td>TD 2</td>
+                        </tr>
+                        <tr>
+                            <td>Row3</td>
+                        </tr>
+                        <tr>
+                            <td>Row4</td>
+                            <td>TD 2</td>
+                            <td>TD 3</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    <img src="sample.jfif" />
+                </p>
+            </eo-editor>
+            <div style="padding: 8px; text-align: center">
+                <button type="submit">提交</button>
+            </div>
+        </form>
+    </body>
+</html>

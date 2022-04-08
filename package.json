@@ -1,0 +1,60 @@
+{
+    "name": "@etsoo/editor",
+    "version": "1.0.0",
+    "description": "ETSOO Free WYSIWYG HTML Editor",
+    "main": "lib/cjs/index.js",
+    "module": "lib/mjs/index.js",
+    "types": "lib/mjs/index.d.ts",
+    "exports": {
+        ".": {
+            "import": "./lib/mjs/index.js",
+            "require": "./lib/cjs/index.js"
+        }
+    },
+    "scripts": {
+        "start": "webpack serve",
+        "build": "webpack --mode production --no-devtool",
+        "webpack": "webpack",
+        "tsc": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ETSOO/EOEditor.git"
+    },
+    "keywords": [
+        "EOEditor",
+        "亿速编辑器",
+        "TypeScript",
+        "ETSOO",
+        "青岛亿速思维",
+        "上海亿商"
+    ],
+    "author": "Garry Xiao",
+    "license": "MIT",
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "prettier": "2.6.2",
+        "ts-loader": "^9.2.8",
+        "typescript": "^4.6.3",
+        "webpack": "^5.71.0",
+        "webpack-cli": "^4.9.2",
+        "webpack-dev-server": "^4.7.4"
+    },
+    "dependencies": {
+        "@etsoo/shared": "^1.1.19",
+        "@types/fabric": "^4.5.7",
+        "fabric": "^5.2.1"
+    }
+}
