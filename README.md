@@ -1,12 +1,11 @@
 # EOEditor
  ETSOO Free WYSIWYG HTML Editor
  亿速思维免费提供的所见即所的HTML编辑器
- 億速思維免費提供的所見即所的HTML編輯器
 
 ## Support / 支持 ##
 - Browsers since 2019 (ES2019+), no Internet Exployer support.
 - Custom HTML element/component features needed.
-- English and Chinese.
+- English and Chinese(简体/繁体).
 
 ## Installing / 安装 ##
 Using npm:
