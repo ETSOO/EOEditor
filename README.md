@@ -6,8 +6,13 @@
 
 ## Support / 支持 ##
 - Browsers since 2019 (ES2019+), no Internet Exployer support.
-- Custom HTML element/component features needed.
+- Custom HTML element/component feature. Easilly integrate with other frameworks like Angular/React/Vue.
+- One file (≈500K) is all, no other dependencies.
 - English and Chinese(简体/繁体).
+
+## / Picture editing / 图片编辑 ##
+- Browser(client) side picture editing like rotate/resize/filter, text.
+- Integrated with Fabric.js (http://fabricjs.com/).
 
 ## Installing / 安装 ##
 Using npm:
