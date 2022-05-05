@@ -2,6 +2,8 @@
  ETSOO Free WYSIWYG HTML Editor
  亿速思维免费提供的所见即所的HTML编辑器
 
+ Access to https://jsfiddle.net/wfv76m14/1/ to have a quick look.
+
 ## Support / 支持 ##
 - Browsers since 2019 (ES2019+), no Internet Exployer support.
 - Custom HTML element/component features needed.
@@ -23,7 +25,7 @@ $ yarn add @etsoo/editor
 Using web:
 Download the script from "dist/eoeditor.js" or use CDN
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@etsoo/editor@1.0.2/dist/eoeditor.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/etsoo/eoeditor/dist/eoeditor.js"></script>
 <eo-editor name="content">
 	<p>
 	Content to be edited here<br>包含编辑的内容
@@ -38,6 +40,7 @@ if (editor) {
 }
 </script>
 ```
+
 
 ## Properties / 属性 ##
 

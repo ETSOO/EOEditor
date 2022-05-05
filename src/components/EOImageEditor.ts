@@ -1,4 +1,4 @@
-import { DomUtils, NumberUtils, Utils } from '@etsoo/shared';
+import { DomUtils, Keyboard, NumberUtils, Utils } from '@etsoo/shared';
 import { fabric } from 'fabric';
 import {
     EOEditorHistory,
@@ -544,9 +544,36 @@ export class EOImageEditor extends HTMLElement {
     }
 
     private onKeypress(event: KeyboardEvent) {
-        if (event.key === 'Delete') {
-            this.doAction('delete');
-            return;
+        if (this.activeObject) {
+            const keys = Keyboard.Keys;
+            if (event.key === keys.Delete) {
+                this.preventEvent(event);
+                this.doAction('delete');
+                return;
+            } else {
+                const change: [number, number] = [0, 0];
+
+                if (event.key === keys.ArrowLeft) {
+                    change[0] = -1;
+                } else if (event.key === keys.ArrowRight) {
+                    change[0] = 1;
+                } else if (event.key === keys.ArrowUp) {
+                    change[1] = -1;
+                } else if (event.key === keys.ArrowDown) {
+                    change[1] = 1;
+                } else {
+                    return;
+                }
+
+                this.preventEvent(event);
+
+                const left = this.activeObject.left ?? 0;
+                const top = this.activeObject.top ?? 0;
+
+                this.activeObject.left = left + change[0];
+                this.activeObject.top = top + change[1];
+                this.fc?.renderAll();
+            }
         }
     }
 
@@ -596,17 +623,6 @@ export class EOImageEditor extends HTMLElement {
             },
             EOImageEditorSeparator,
             {
-                name: 'bringToFront',
-                icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H10V20H20V10H18V8H22Z" />',
-                label: l.bringToFront
-            },
-            {
-                name: 'bringToBack',
-                icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H18V8H22M4,4V14H14V4H4Z" />',
-                label: l.bringToBack
-            },
-            EOImageEditorSeparator,
-            {
                 name: 'text',
                 icon: '<path d="M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z" />',
                 label: l.text
@@ -627,6 +643,26 @@ export class EOImageEditor extends HTMLElement {
                 label: l.filter
             },
             EOImageEditorSeparator,
+            {
+                name: 'hcenter',
+                icon: '<path d="M19,16V13H23V11H19V8L15,12L19,16M5,8V11H1V13H5V16L9,12L5,8M11,20H13V4H11V20Z" />',
+                label: l.hcenter
+            },
+            {
+                name: 'vcenter',
+                icon: '<path d="M8,19H11V23H13V19H16L12,15L8,19M16,5H13V1H11V5H8L12,9L16,5M4,11V13H20V11H4Z" />',
+                label: l.vcenter
+            },
+            {
+                name: 'bringToFront',
+                icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H10V20H20V10H18V8H22Z" />',
+                label: l.bringToFront
+            },
+            {
+                name: 'bringToBack',
+                icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H18V8H22M4,4V14H14V4H4Z" />',
+                label: l.bringToBack
+            },
             {
                 name: 'delete',
                 icon: '<path d="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" />',
@@ -889,6 +925,21 @@ export class EOImageEditor extends HTMLElement {
             case 'filter':
                 if (o instanceof fabric.Image) this.filterSettings(o);
                 break;
+            case 'hcenter':
+                if (o) {
+                    const hZoom = this.fc?.getZoom() ?? 1;
+                    if (hZoom === 1) {
+                        o.centerH();
+                    } else {
+                        const hCenter =
+                            ((this.fc.width ?? 0) / hZoom -
+                                (o.width ?? 0) * (o.scaleX ?? 1)) /
+                            2;
+                        o.left = hCenter;
+                        this.fc.renderAll();
+                    }
+                }
+                break;
             case 'preview':
                 this.clear();
                 const pData = this.fc.toDataURL({
@@ -940,6 +991,21 @@ export class EOImageEditor extends HTMLElement {
                 break;
             case 'undo':
                 this.history?.back();
+                break;
+            case 'vcenter':
+                if (o) {
+                    const vZoom = this.fc?.getZoom() ?? 1;
+                    if (vZoom === 1) {
+                        o.centerV();
+                    } else {
+                        const vCenter =
+                            ((this.fc.height ?? 0) / vZoom -
+                                (o.height ?? 0) * (o.scaleY ?? 1)) /
+                            2;
+                        o.top = vCenter;
+                        this.fc.renderAll();
+                    }
+                }
                 break;
             case 'zoomIn':
                 const zi = (this.fc.getZoom() + 0.1).toExact();
@@ -1864,9 +1930,55 @@ export class EOImageEditor extends HTMLElement {
         });
 
         let objectLastPos: [fabric.Object, number?, number?] | undefined;
+        let movingIndicator: fabric.IText | undefined;
         fc.on('object:moving', (e) => {
             if (objectLastPos == null && e.target) {
                 objectLastPos = [e.target, e.target.left, e.target.top];
+            }
+
+            if (this.activeObject) {
+                const zoom = this.fc?.getZoom() ?? 1;
+                if (movingIndicator == null) {
+                    movingIndicator = new fabric.IText('', {
+                        fontSize: 9 / zoom
+                    });
+                    this.fc?.add(movingIndicator);
+                }
+                const {
+                    left = 0,
+                    top = 0,
+                    width = 0,
+                    scaleX = 1,
+                    height = 0,
+                    scaleY = 1
+                } = this.activeObject;
+
+                const fcWidth = (this.fc?.width ?? 0) / zoom;
+                const fcHeight = (this.fc?.height ?? 0) / zoom;
+
+                const oWidth = width * scaleX;
+                const oHeight = height * scaleY;
+
+                if (Math.abs((fcWidth - oWidth) / 2 - left) < 1) {
+                    movingIndicator.set('fill', '#ff0000');
+                } else {
+                    movingIndicator.set('fill', '#000');
+                }
+
+                if (Math.abs((fcHeight - oHeight) / 2 - top) < 1) {
+                    movingIndicator.set('backgroundColor', '#ffff00');
+                } else {
+                    movingIndicator.set('backgroundColor', undefined);
+                }
+
+                movingIndicator.text = `${(left * zoom).toExact(0)} x ${(
+                    top * zoom
+                ).toExact(0)}`;
+                movingIndicator.left = (left + oWidth / 2 + 4).toExact(0);
+                movingIndicator.top = (
+                    top <= 30 ? top + 8 + oHeight : top - 22
+                ).toExact(0);
+                this.fc?.renderAll();
             }
         });
 
@@ -1903,6 +2015,11 @@ export class EOImageEditor extends HTMLElement {
                 this.history?.pushState(moveState);
 
                 objectLastPos = undefined;
+            }
+
+            if (movingIndicator) {
+                this.fc?.remove(movingIndicator);
+                movingIndicator = undefined;
             }
 
             // Scaling
@@ -2032,6 +2149,8 @@ export class EOImageEditor extends HTMLElement {
                 'bringToFront',
                 'crop',
                 'filter',
+                'hcenter',
+                'vcenter',
                 'delete'
             ].forEach((n) => {
                 const b = this.icons.querySelector<HTMLButtonElement>(
@@ -2047,7 +2166,13 @@ export class EOImageEditor extends HTMLElement {
                 if (b) b.disabled = false;
             });
 
-            ['bringToBack', 'bringToFront', 'delete'].forEach((n) => {
+            [
+                'hcenter',
+                'vcenter',
+                'bringToBack',
+                'bringToFront',
+                'delete'
+            ].forEach((n) => {
                 const b = this.icons.querySelector<HTMLButtonElement>(
                     `button[name="${n}"]`
                 );

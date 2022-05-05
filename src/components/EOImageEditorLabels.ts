@@ -21,6 +21,7 @@ export type EOImageEditorLabelLanguage = {
     fontFamily: string;
     fontWeight: string;
     grayscale: string;
+    hcenter: string;
     height: string;
     hueRotation: string;
     image: string;
@@ -49,6 +50,7 @@ export type EOImageEditorLabelLanguage = {
     text: string;
     underline: string;
     undo: string;
+    vcenter: string;
     vibrance: string;
     vintage: string;
     width: string;
@@ -78,6 +80,7 @@ const zhCN: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
         fontFamily: '字体',
         fontWeight: '字体粗细',
         grayscale: '灰度',
+        hcenter: '水平居中',
         height: '高度',
         hueRotation: '色相旋转',
         image: '图片',
@@ -106,6 +109,7 @@ const zhCN: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
         text: '文字',
         underline: '下划线',
         undo: '撤销',
+        vcenter: '垂直居中',
         vibrance: '活力',
         vintage: '复古',
         width: '宽度',
@@ -136,6 +140,7 @@ const zhHK: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
         fontFamily: '字體',
         fontWeight: '字體粗細',
         grayscale: '灰度',
+        hcenter: '水平居中',
         height: '高度',
         hueRotation: '色相旋轉',
         image: '圖片',
@@ -164,6 +169,7 @@ const zhHK: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
         text: '文字',
         underline: '下劃線',
         undo: '撤銷',
+        vcenter: '垂直居中',
         vibrance: '活力',
         vintage: '復古',
         width: '寬度',
@@ -193,6 +199,7 @@ const enUS: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
         fontFamily: 'Font',
         fontWeight: 'Font weight',
         grayscale: 'Grayscale',
+        hcenter: 'Horizontal center',
         height: 'Height',
         hueRotation: 'Hue rotation',
         image: 'Image',
@@ -221,6 +228,7 @@ const enUS: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
         text: 'Text',
         underline: 'Underline',
         undo: 'Undo',
+        vcenter: 'Vertical center',
         vibrance: 'Vibrance',
         vintage: 'Vintage',
         width: 'Width',
