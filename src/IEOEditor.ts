@@ -3,6 +3,7 @@ import {
     IEOEditorIconCommand
 } from './classes/EOEditorCommand';
 import { EOEditorLabelLanguage } from './classes/EOEditorLabels';
+import { EOImageEditor } from './components/EOImageEditor';
 import { EOPopup } from './components/EOPopup';
 
 /**
@@ -40,7 +41,7 @@ export interface IEOEditor {
     readonly editorContainer: HTMLDivElement;
 
     /**
-     * Editor iframe
+     * Editor hosted iframe
      */
     readonly editorFrame: HTMLIFrameElement;
 
@@ -55,12 +56,12 @@ export interface IEOEditor {
     readonly editorToolbar: HTMLDivElement;
 
     /**
-     * Editor iframe window
+     * Editor hosted iframe window
      */
     readonly editorWindow: Window;
 
     /**
-     * Editor labels
+     * Editor current labels
      */
     readonly labels?: EOEditorLabelLanguage;
 
@@ -70,22 +71,27 @@ export interface IEOEditor {
     readonly lastClickedButton?: IEOEditorClickedButton;
 
     /**
-     * Popup
+     * Image editor
+     */
+    readonly imageEditor: EOImageEditor;
+
+    /**
+     * Popup component
      */
     readonly popup: EOPopup;
 
     /**
-     * Name
+     * Name for the hidden form input
      */
     name: string | null;
 
     /**
      * Clone styles
      */
-    cloneStyles: string | null;
+    cloneStyles: string | boolean | null;
 
     /**
-     * Commands, a supported kind or commands array
+     * Commands, a supported collection or commands array like ['redo', 'undo']
      */
     commands: string | null;
 
@@ -100,22 +106,22 @@ export interface IEOEditor {
     activeColor: string | null;
 
     /**
-     * Width
+     * Width of the editor
      */
     width: string | null;
 
     /**
-     * Height
+     * Height of the editor
      */
     height: string | null;
 
     /**
-     * Style with CSS
+     * Style with CSS or tag
      */
-    styleWithCSS: string | null;
+    styleWithCSS: string | boolean | null;
 
     /**
-     * Language
+     * Language of the UI, like en-US, zh-CN, zh-HK
      */
     language: string | null;
 
@@ -140,6 +146,19 @@ export interface IEOEditor {
     delete(): void;
 
     /**
+     * Edit image
+     * @param image Image to edit
+     * @param callback Callback when doen
+     */
+    editImage(image: HTMLImageElement, callback?: () => void): void;
+
+    /**
+     * Get current content
+     * @returns Content
+     */
+    getContent(): string;
+
+    /**
      * Get deepest node
      * @param node Node
      * @returns Deepest node
@@ -147,19 +166,19 @@ export interface IEOEditor {
     getDeepestNode(node: Node): Node;
 
     /**
-     * Get first element
+     * Get first selection element
      * @param selection Selection
      */
     getFirstElement(selection: Selection | null): HTMLElement | null;
 
     /**
-     * Get first element
+     * Get first range element
      * @param range Range
      */
     getFirstElement(range: Range | null): HTMLElement | null;
 
     /**
-     * Get first link
+     * Get first section outer link
      * @returns Link
      */
     getFirstLink(): HTMLAnchorElement | null;
@@ -183,7 +202,7 @@ export interface IEOEditor {
     getSelection(): Selection | null;
 
     /**
-     * Insert HTML
+     * Insert HTML text to current selection point
      * @param html Valid HTML string
      * @param autoCollapse Auto collapse for the range
      */
@@ -200,13 +219,6 @@ export interface IEOEditor {
     insertTable(): void;
 
     /**
-     * Is top popup
-     * @param popup EOPopup
-     * @returns Result
-     */
-    isTopPopup(popup: EOPopup): boolean;
-
-    /**
      * Execute command
      * @param name Name
      */
@@ -218,30 +230,28 @@ export interface IEOEditor {
     popupBlocks(): void;
 
     /**
-     * Popup colors
+     * Popup color palette
      * @param color Current color
      * @param callback Callback
-     * @param popup EOPopup
      */
     popupColors(
         color: string | undefined,
-        callback: (color: string) => void,
-        popup?: EOPopup
+        callback: (color: string) => void
     ): void;
 
     /**
-     * Popup content
+     * Popup HTML content
      * @param content HTML content
      * @param ready Ready callback
-     * @param popup EOPopup
      */
-    popupContent(content: string, ready?: () => void, popup?: EOPopup): void;
+    popupContent(content: string, ready?: () => void): void;
 
     /**
      * Popup icons
      * @param icons Icons
+     * @param ready Callback
      */
-    popupIcons(icons: IEOEditorIconCommand[]): void;
+    popupIcons(icons: IEOEditorIconCommand[], ready?: () => void): void;
 
     /**
      * Popup styles
@@ -259,7 +269,7 @@ export interface IEOEditor {
     popupSubs(): void;
 
     /**
-     * Restore focus to the editor
+     * Restore focus to the editor iframe
      */
     restoreFocus(): void;
 

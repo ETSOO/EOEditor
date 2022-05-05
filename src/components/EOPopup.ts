@@ -25,15 +25,28 @@ export class EOPopup extends HTMLElement {
 
         const shadowRoot = this.attachShadow({ mode: 'open' });
         shadowRoot.appendChild(template.content);
+
+        document.addEventListener('mousedown', this.clickHandler.bind(this));
     }
 
     private updatePos(location?: DOMRect) {
-        const rect = location ?? new DOMRect(0, 0, 0, 0);
+        const { clientWidth: maxWidth, clientHeight: maxHeight } =
+            window.document.body;
+
         const prect: DOMRect = this.getBoundingClientRect();
+
+        const rect =
+            location ??
+            new DOMRect(
+                (maxWidth - prect.width) / 2,
+                (maxHeight - prect.height) / 2,
+                0,
+                0
+            );
 
         // Left
         let left = rect.left;
-        const maxWidth = window.document.body.clientWidth;
+
         if (left + prect.width > maxWidth) {
             // Right
             left = rect.right - prect.width;
@@ -58,17 +71,17 @@ export class EOPopup extends HTMLElement {
 
     private clickHandler(event: MouseEvent) {
         // https://stackoverflow.com/questions/57963312/get-event-target-inside-a-web-component
+        const cp = event.composedPath();
         if (
             this.style.visibility === 'hidden' ||
-            event.composedPath().includes(this) ||
-            event
-                .composedPath()
-                .some(
+            cp.includes(this) ||
+            (this.nodeName !== 'EO-PALETTE' &&
+                cp.some(
                     (p) =>
                         p instanceof HTMLElement &&
-                        p.nodeName === 'EO-POPUP' &&
-                        p.className === 'top-popup'
-                )
+                        (p.nodeName === 'EO-PALETTE' ||
+                            p.nodeName === 'EO-IMAGE-EDITOR')
+                ))
         ) {
             return;
         }
@@ -77,7 +90,6 @@ export class EOPopup extends HTMLElement {
 
     connectedCallback() {
         this.hide();
-        document.addEventListener('mousedown', this.clickHandler.bind(this));
     }
 
     disconnectedCallback() {
@@ -89,8 +101,16 @@ export class EOPopup extends HTMLElement {
      * Hide the popup
      */
     hide() {
-        // console.trace();
+        //console.trace();
         this.style.visibility = 'hidden';
+    }
+
+    /**
+     * Is visible
+     * @returns result
+     */
+    isVisible() {
+        return this.style.visibility === 'visible';
     }
 
     private clearUpdateSeed() {

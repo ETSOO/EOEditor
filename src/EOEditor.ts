@@ -19,9 +19,9 @@ import {
     EOEditorCharacterType
 } from './classes/EOEditorCharacters';
 import { EOImageEditor } from './components/EOImageEditor';
-import { EColor, Utils } from '@etsoo/shared';
-import { fabric } from 'fabric';
+import { DomUtils, EColor, Utils } from '@etsoo/shared';
 import { VirtualTable } from './classes/VirtualTable';
+import { EOPalette } from './components/EOPalette';
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -149,30 +149,6 @@ template.innerHTML = `
                 eo-popup .icon-button svg {
                     margin-right: 4px;
                 }
-            eo-popup .color-more {
-                margin-top: 6px;
-                display: flex;
-                width: 290px;
-                flex-wrap: wrap;
-                gap: 4px;
-            }
-                eo-popup .color-more .color-circle {
-                    width: 24px;
-                    height: 24px;
-                    border: 1px solid #ccc;
-                    border-radius: 50%;
-                    cursor: pointer;
-                    text-align: center;
-                    line-height: 22px;
-                    vertical-align: middle;
-                }
-            eo-popup .color-container {
-                display: flex;
-                gap: 5px;
-                margin-top: 6px;
-                width: 290px;
-                height: 200px;
-            }
             eo-popup .tab-page {
                 padding: 12px;
                 width: min(75vw, 640px);
@@ -257,10 +233,10 @@ template.innerHTML = `
             .toolbar button:enabled:hover svg, .toolbar button.active svg, eo-popup .icons button:hover svg, eo-popup .icons button.active svg {
                 fill: var(--color-active);
             }
-            .toolbar button:disabled, eo-popup .icons button:disabled {
+            .toolbar button:disabled, eo-popup button:disabled {
                 color: RGBA(0, 0, 0, 0.33);
             }
-            .toolbar button:disabled svg, eo-popup .icons button:disabled svg {
+            .toolbar button:disabled svg, eo-popup button:disabled svg {
                 fill: RGBA(0, 0, 0, 0.33);
             }
 
@@ -288,8 +264,8 @@ template.innerHTML = `
             }
     </style>
     <eo-tooltip></eo-tooltip>
-    <eo-popup class="normal-popup"></eo-popup>
-    <eo-popup class="top-popup"></eo-popup>
+    <eo-palette></eo-palette>
+    <eo-popup></eo-popup>
     <eo-image-editor></eo-image-editor>
     <div class="container">
         <div class="toolbar"></div>
@@ -326,6 +302,8 @@ const borderStyles = [
     'outset'
 ];
 
+const hhClass = 'eo-highlight';
+
 /**
  * EOEditor
  */
@@ -360,11 +338,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     static readonly BackupKey = 'EOEditor-Backup';
 
     /**
-     * Favorite colors key
-     */
-    static readonly FavoriteColorsKey = 'EOEditor-Favorite-Colors';
-
-    /**
      * Lastest characters key
      */
     static readonly LatestCharactersKey = 'EOEditor-Latest-Characters';
@@ -378,14 +351,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     >;
 
     /**
+     * Image editor
+     */
+    readonly imageEditor: EOImageEditor;
+
+    /**
      * Popup
      */
     readonly popup: EOPopup;
-
-    /**
-     * Popup topest
-     */
-    readonly popupTop: EOPopup;
 
     /**
      * Editor container
@@ -423,6 +396,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         return this._labels;
     }
 
+    // Color palette
+    private palette: EOPalette;
+
     // Backup seed
     private backupSeed: number = 0;
 
@@ -432,6 +408,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     // Form element
     private form?: HTMLFormElement | null;
     private formInput?: HTMLInputElement;
+
+    private currentCell: HTMLTableCellElement | null = null;
+    private lastHighlights?: HTMLTableCellElement[];
 
     // Categories with custom order
     // Same order with label specialCharacterCategories
@@ -464,13 +443,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     /**
-     * Clone styles
+     * Clone styles to editor
      */
     get cloneStyles() {
         return this.getAttribute('cloneStyles');
     }
-    set cloneStyles(value: string | null) {
-        if (value) this.setAttribute('cloneStyles', value);
+    set cloneStyles(value: string | boolean | null) {
+        if (value) this.setAttribute('cloneStyles', value.toString());
         else this.removeAttribute('cloneStyles');
     }
 
@@ -535,8 +514,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get styleWithCSS() {
         return this.getAttribute('styleWithCSS');
     }
-    set styleWithCSS(value: string | null) {
-        if (value) this.setAttribute('styleWithCSS', value);
+    set styleWithCSS(value: string | boolean | null) {
+        if (value) this.setAttribute('styleWithCSS', value.toString());
         else this.removeAttribute('styleWithCSS');
     }
 
@@ -563,8 +542,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         shadowRoot.appendChild(template.content.cloneNode(true));
 
         // Nodes
-        this.popup = shadowRoot.querySelector('eo-popup.normal-popup')!;
-        this.popupTop = shadowRoot.querySelector('eo-popup.top-popup')!;
+        this.palette = shadowRoot.querySelector('eo-palette')!;
+        this.popup = shadowRoot.querySelector('eo-popup')!;
+        this.imageEditor = shadowRoot.querySelector('eo-image-editor')!;
 
         this.editorContainer = shadowRoot.querySelector('.container')!;
         this.editorToolbar = this.editorContainer.querySelector('.toolbar')!;
@@ -591,6 +571,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         const language = this.language ?? window.navigator.language;
         const labels = EOEditorGetLabels(language);
         this._labels = labels;
+
+        this.imageEditor.language = language;
+        this.palette.applyLabel = labels.apply;
 
         const buttons = commands
             .map((c) => {
@@ -652,7 +635,72 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     /**
-     * Restore focus to the editor
+     * Edit image
+     * @param image Image to edit
+     * @param callback Callback when doen
+     */
+    editImage(image: HTMLImageElement, callback?: (data: string) => void) {
+        this.imageEditor.open(image, callback);
+    }
+
+    private getAllHighlights(): HTMLTableCellElement[];
+    private getAllHighlights(table: HTMLTableElement): HTMLTableCellElement[];
+    private getAllHighlights(range: Range): HTMLTableCellElement[];
+    private getAllHighlights(
+        range: HTMLTableElement | Range
+    ): HTMLTableCellElement[];
+    private getAllHighlights(container?: HTMLTableElement | Range) {
+        if (container == null || 'querySelectorAll' in container)
+            return Array.from(
+                (container ?? this.editorWindow.document).querySelectorAll(
+                    `td.${hhClass}, th.${hhClass}`
+                )
+            );
+
+        const items: HTMLTableCellElement[] = [];
+
+        const startTd = (
+            container.startContainer.nodeType === Node.ELEMENT_NODE
+                ? (container.startContainer as HTMLElement)
+                : container.startContainer.parentElement
+        )?.closest<HTMLTableCellElement>('td, th');
+
+        const endTd = (
+            container.endContainer.nodeType === Node.ELEMENT_NODE
+                ? (container.endContainer as HTMLElement)
+                : container.endContainer.parentElement
+        )?.closest<HTMLTableCellElement>('td, th');
+
+        if (startTd && endTd) {
+            if (container.commonAncestorContainer.nodeName === 'TR') {
+                items.push(startTd);
+                let nextTd = startTd.nextElementSibling;
+                while (nextTd) {
+                    if (nextTd.nodeName === 'TD' || nextTd.nodeName === 'TH') {
+                        items.push(nextTd as HTMLTableCellElement);
+                    }
+
+                    if (nextTd == endTd) break;
+
+                    nextTd = nextTd.nextElementSibling;
+                }
+            } else {
+                items.push(startTd, endTd);
+            }
+        }
+
+        return items;
+    }
+
+    /**
+     * Clear highlights
+     */
+    private clearHighlights() {
+        this.getAllHighlights().forEach((td) => td.classList.remove(hhClass));
+    }
+
+    /**
+     * Restore focus to the editor iframe
      */
     restoreFocus() {
         this.editorWindow.document.body.focus();
@@ -714,6 +762,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 activeColor.toRGBColor(0.05),
                 'important'
             );
+            this.imageEditor.panelColor = activeColor.toRGBColor(0.2);
             this.style.setProperty(
                 '--color-active-bg',
                 activeColor.toRGBColor(0.2),
@@ -768,7 +817,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
     private closePopups() {
         this.popup.hide();
-        this.popupTop.hide();
+        this.palette.hide();
     }
 
     private setContent() {
@@ -804,9 +853,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                         border: 6px double #ccc;
                         box-sizing: border-box;
                     }
-                    .textbox {
+                    .eo-textbox {
                         border: 6px double #ccc;
                         box-sizing: border-box;
+                    }
+                    .eo-highlight {
+                        background-color: Highlight;
+                        color: HighlightText;
                     }
                 </style>`
             );
@@ -823,6 +876,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             // Editable
             doc.body.contentEditable = 'true';
 
+            // Keep the reference
+            this.palette.refDocument = doc;
+
             // Press enter for <p>, otherwise is <br/>
             // this.style.display = 'inline-block';
             doc.execCommand('defaultParagraphSeparator', false, 'p');
@@ -837,7 +893,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
             const styleWithCSS = this.styleWithCSS;
             if (styleWithCSS) {
-                doc.execCommand('styleWithCSS', undefined, styleWithCSS);
+                doc.execCommand(
+                    'styleWithCSS',
+                    undefined,
+                    styleWithCSS.toString()
+                );
             }
 
             // Listen to focus event
@@ -847,6 +907,46 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 const target = event.target;
                 if (target == null || !('nodeName' in target)) {
                     return;
+                }
+
+                if (event.ctrlKey) {
+                    const selection = this.getSelection();
+                    if (selection) {
+                        const e = target as HTMLElement;
+                        const td = e.closest<HTMLTableCellElement>('td, th');
+                        if (td) {
+                            // Table
+                            const table = td.closest('table');
+                            if (table) {
+                                // First one
+                                if (this.getAllHighlights(table).length === 0) {
+                                    td.classList.add(hhClass);
+                                } else {
+                                    const vt = VirtualTable.tables.find(
+                                        (item) => item.HTMLTable == table
+                                    );
+                                    if (vt) {
+                                        // Next to the current items
+                                        if (
+                                            vt
+                                                .getNearCells(td)
+                                                .some((c) =>
+                                                    c.classList.contains(
+                                                        hhClass
+                                                    )
+                                                )
+                                        ) {
+                                            td.classList.add(hhClass);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    event.preventDefault();
+                } else {
+                    this.clearHighlights();
                 }
 
                 const nodeName = target['nodeName'];
@@ -862,7 +962,12 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                             name: 'edit',
                             label: labels.edit,
                             icon: EOEditorSVGs.edit,
-                            action: () => {}
+                            action: () => {
+                                this.editImage(
+                                    image,
+                                    (data) => (image.src = data)
+                                );
+                            }
                         },
                         {
                             name: 'link',
@@ -934,102 +1039,134 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                         }
                     } else {
                         const cell =
-                            element.closest('td') ?? element.closest('th');
-
+                            element.closest<HTMLTableCellElement>('td, th');
                         if (cell) {
+                            this.currentCell = cell;
                             const table = cell.closest('table');
                             if (table) {
                                 if (this.adjustTargetPopup(table)) {
                                     // Virtual table
                                     const vt = new VirtualTable(table);
 
-                                    this.popupIcons([
-                                        {
-                                            name: 'tableProperties',
-                                            label: labels.tableProperties,
-                                            icon: EOEditorSVGs.tableEdit,
-                                            action: () => {
-                                                this.tableProperties(table);
+                                    this.popupIcons(
+                                        [
+                                            {
+                                                name: 'tableProperties',
+                                                label: labels.tableProperties,
+                                                icon: EOEditorSVGs.tableEdit,
+                                                action: () => {
+                                                    this.tableProperties(table);
+                                                }
+                                            },
+                                            {
+                                                name: 'tableRemove',
+                                                label: `${labels.delete}(${labels.table})`,
+                                                icon: EOEditorSVGs.tableRemove,
+                                                action: () => {
+                                                    vt.removeTable();
+                                                }
+                                            },
+                                            EOEditorSeparator,
+                                            {
+                                                name: 'tableSplitCell',
+                                                label: `${labels.tableSplitCell}`,
+                                                icon: EOEditorSVGs.tableSplitCell,
+                                                action: () => {
+                                                    this.tableSplitCell(
+                                                        (isRow, qty) => {
+                                                            vt.splitCell(
+                                                                this
+                                                                    .currentCell!,
+                                                                isRow,
+                                                                qty
+                                                            );
+                                                        }
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                name: 'tableMergeCells',
+                                                label: `${labels.tableMergeCells}`,
+                                                icon: EOEditorSVGs.tableMergeCells,
+                                                action: () => {
+                                                    let cells =
+                                                        this.lastHighlights ??
+                                                        this.getAllHighlights(
+                                                            table
+                                                        );
+                                                    vt.mergeCells(cells);
+                                                }
+                                            },
+                                            EOEditorSeparator,
+                                            {
+                                                name: 'tableColumnAddBefore',
+                                                label: `${labels.tableColumnAddBefore}`,
+                                                icon: EOEditorSVGs.tableColumnAddBefore,
+                                                action: () => {
+                                                    vt.addColumnBefore(
+                                                        this.currentCell!
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                name: 'tableColumnAddAfter',
+                                                label: `${labels.tableColumnAddAfter}`,
+                                                icon: EOEditorSVGs.tableColumnAddAfter,
+                                                action: () => {
+                                                    vt.addColumnAfter(
+                                                        this.currentCell!
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                name: 'tableColumnRemove',
+                                                label: `${labels.tableColumnRemove}`,
+                                                icon: EOEditorSVGs.tableColumnRemove,
+                                                action: () => {
+                                                    vt.removeColumn(
+                                                        this.currentCell!
+                                                    );
+                                                }
+                                            },
+                                            EOEditorSeparator,
+                                            {
+                                                name: 'tableRowAddBefore',
+                                                label: `${labels.tableRowAddBefore}`,
+                                                icon: EOEditorSVGs.tableRowAddBefore,
+                                                action: () => {
+                                                    vt.addRowBefore(
+                                                        this.currentCell!
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                name: 'tableRowAddAfter',
+                                                label: `${labels.tableRowAddAfter}`,
+                                                icon: EOEditorSVGs.tableRowAddAfter,
+                                                action: () => {
+                                                    vt.addRowAfter(
+                                                        this.currentCell!
+                                                    );
+                                                }
+                                            },
+                                            {
+                                                name: 'tableRowRemove',
+                                                label: `${labels.tableRowRemove}`,
+                                                icon: EOEditorSVGs.tableRowRemove,
+                                                action: () => {
+                                                    vt.removeRow(
+                                                        this.currentCell!
+                                                    );
+                                                }
                                             }
-                                        },
-                                        {
-                                            name: 'tableRemove',
-                                            label: `${labels.delete}(${labels.table})`,
-                                            icon: EOEditorSVGs.tableRemove,
-                                            action: () => {
-                                                table.remove();
-                                            }
-                                        },
-                                        EOEditorSeparator,
-                                        {
-                                            name: 'tableSplitCell',
-                                            label: `${labels.tableSplitCell}`,
-                                            icon: EOEditorSVGs.tableSplitCell,
-                                            action: () => {
-                                                table.remove();
-                                            }
-                                        },
-                                        {
-                                            name: 'tableMergeCells',
-                                            label: `${labels.tableMergeCells}`,
-                                            icon: EOEditorSVGs.tableMergeCells,
-                                            action: () => {
-                                                table.remove();
-                                            }
-                                        },
-                                        EOEditorSeparator,
-                                        {
-                                            name: 'tableColumnAddBefore',
-                                            label: `${labels.tableColumnAddBefore}`,
-                                            icon: EOEditorSVGs.tableColumnAddBefore,
-                                            action: () => {
-                                                vt.addColumnBefore(cell);
-                                            }
-                                        },
-                                        {
-                                            name: 'tableColumnAddAfter',
-                                            label: `${labels.tableColumnAddAfter}`,
-                                            icon: EOEditorSVGs.tableColumnAddAfter,
-                                            action: () => {
-                                                vt.addColumnAfter(cell);
-                                            }
-                                        },
-                                        {
-                                            name: 'tableColumnRemove',
-                                            label: `${labels.tableColumnRemove}`,
-                                            icon: EOEditorSVGs.tableColumnRemove,
-                                            action: () => {
-                                                table.remove();
-                                            }
-                                        },
-                                        EOEditorSeparator,
-                                        {
-                                            name: 'tableRowAddBefore',
-                                            label: `${labels.tableRowAddBefore}`,
-                                            icon: EOEditorSVGs.tableRowAddBefore,
-                                            action: () => {
-                                                table.remove();
-                                            }
-                                        },
-                                        {
-                                            name: 'tableRowAddAfter',
-                                            label: `${labels.tableRowAddAfter}`,
-                                            icon: EOEditorSVGs.tableRowAddAfter,
-                                            action: () => {
-                                                table.remove();
-                                            }
-                                        },
-                                        {
-                                            name: 'tableRowRemove',
-                                            label: `${labels.tableRowRemove}`,
-                                            icon: EOEditorSVGs.tableRowRemove,
-                                            action: () => {
-                                                table.remove();
-                                            }
+                                        ],
+                                        () => {
+                                            this.testMergeButton(table);
                                         }
-                                    ]);
+                                    );
                                 } else {
                                     this.popup.reshow();
+                                    this.testMergeButton(table);
                                 }
                             }
                         }
@@ -1076,6 +1213,19 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
             // Display
             this.hidden = false;
+        }
+    }
+
+    private testMergeButton(table: HTMLTableElement | Range) {
+        if (!this.popup.isVisible()) return;
+
+        const mergeButton = this.popup.querySelector<HTMLButtonElement>(
+            'button[name="tableMergeCells"]'
+        );
+
+        if (mergeButton) {
+            this.lastHighlights = this.getAllHighlights(table);
+            mergeButton.disabled = this.lastHighlights.length <= 1;
         }
     }
 
@@ -1359,7 +1509,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         return null;
     }
 
+    /**
+     * Get content
+     * @returns Content
+     */
+    getContent() {
+        this.clearHighlights();
+        return this.innerHTML;
+    }
+
     private onFormSubmit() {
+        this.clearHighlights();
         if (this.formInput) this.formInput.value = this.innerHTML;
         this.backup(0);
     }
@@ -1389,49 +1549,29 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             const sheet = sheets.item(c);
             if (sheet == null) continue;
 
-            for (const rule of sheet.cssRules) {
-                const styleRule = rule as CSSStyleRule;
-                if (!('style' in styleRule)) continue;
+            try {
+                // https://stackoverflow.com/questions/49993633/uncaught-domexception-failed-to-read-the-cssrules-property
+                for (const rule of sheet.cssRules) {
+                    const styleRule = rule as CSSStyleRule;
+                    if (!('style' in styleRule)) continue;
 
-                const parts = styleRule.selectorText
-                    .split(/\s*,\s*/)
-                    .reduce((prev, curr) => {
-                        curr.split(/\s+/).forEach((item) => {
-                            const match = item.match(selector);
-                            if (match && match.length > 1) prev.push(match[1]);
-                        });
-                        return prev;
-                    }, [] as string[]);
+                    const parts = styleRule.selectorText
+                        .split(/\s*,\s*/)
+                        .reduce((prev, curr) => {
+                            curr.split(/\s+/).forEach((item) => {
+                                const match = item.match(selector);
+                                if (match && match.length > 1)
+                                    prev.push(match[1]);
+                            });
+                            return prev;
+                        }, [] as string[]);
 
-                classes.push(...parts);
-            }
+                    classes.push(...parts);
+                }
+            } catch {}
         }
 
         return classes;
-    }
-
-    private addToColors(colors: string[], colorText: string) {
-        const color = EColor.parse(colorText)?.toRGBColor();
-        if (color) colors.push(color);
-    }
-
-    private getColors() {
-        const colors: string[] = [];
-        const sheets = this.editorWindow.document.styleSheets;
-        for (let c = 0; c < sheets.length; c++) {
-            const sheet = sheets.item(c);
-            if (sheet == null) continue;
-
-            for (let r = 0; r < sheet.cssRules.length; r++) {
-                const rule = sheet.cssRules[r] as CSSStyleRule;
-                if ('style' in rule) {
-                    this.addToColors(colors, rule.style.color);
-                    this.addToColors(colors, rule.style.backgroundColor);
-                    this.addToColors(colors, rule.style.borderColor);
-                }
-            }
-        }
-        return colors;
     }
 
     private onSelectionChange() {
@@ -1465,6 +1605,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             this.toggleButtonsCaret();
         } else {
             this.toggleButtons(false);
+
+            if (range) this.testMergeButton(range);
         }
 
         // Element
@@ -1576,15 +1718,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             element = element.parentElement;
             if (element?.tagName === 'BODY') break;
         }
-    }
-
-    /**
-     * Is top popup
-     * @param popup EOPopup
-     * @returns Result
-     */
-    isTopPopup(popup: EOPopup) {
-        return popup.classList.contains('top-popup');
     }
 
     /**
@@ -1780,20 +1913,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         const input = this.popup.querySelector<HTMLInputElement>(
             `input#${id}`
         )!;
-        input.addEventListener('focusin', () => {
-            this.popupColors(
-                input.value,
-                (color) => {
-                    input.value = color;
-                    input.style.borderColor = color;
-                },
-                this.popupTop
-            );
-        });
-        input.addEventListener('change', () => {
-            input.style.borderColor = input.value;
-        });
-        input.dispatchEvent(new Event('change'));
+        this.palette.setupInput(input);
     }
 
     private popupTextbox(div?: HTMLDivElement) {
@@ -1931,7 +2051,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             const file = files.item(0);
             if (!file?.type.startsWith('image/')) return;
 
-            this.readAsDataURL(file, (data) => {
+            DomUtils.fileToDataURL(file).then((data) => {
                 const items: string[] = [];
                 if (bgImageArea.value) {
                     items.push(
@@ -1987,7 +2107,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 let style: CSSStyleDeclaration;
                 if (div == null) {
                     const newDiv = this.createElement('div');
-                    newDiv.classList.add('textbox');
+                    newDiv.classList.add('eo-textbox');
                     newDiv.innerText = labels.textbox;
 
                     // Current element
@@ -2245,17 +2365,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             });
     }
 
-    private readAsDataURL(file: File, callback: (data: string) => void) {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-            const data = reader.result;
-            if (data == null || !this.isConnected) return;
-
-            callback(data as string);
-        };
-    }
-
     private addUnit(value: any) {
         if (value == null) return value;
         if (typeof value !== 'string') value = `${value}`;
@@ -2425,206 +2534,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
      * @param callback Callback
      * @param popup EOPopup
      */
-    popupColors(
-        color: string | undefined,
-        callback: (color: string) => void,
-        popup?: EOPopup
-    ) {
-        popup ??= this.popup;
-
-        // Favorite colors
-        const textFavoriteColors = window.localStorage.getItem(
-            EOEditor.FavoriteColorsKey
-        );
-        const favoriteColors: string[] = textFavoriteColors
-            ? JSON.parse(textFavoriteColors)
-            : [];
-
-        // CSS defined colors
-        const colors = [
-            ...new Set<string>([
-                ...favoriteColors,
-                ...this.getColors(),
-                'transparent',
-                new EColor(0, 0, 0).toRGBColor(),
-                new EColor(255, 255, 255).toRGBColor(),
-                new EColor(255, 0, 0).toRGBColor(),
-                new EColor(0, 255, 0).toRGBColor(),
-                new EColor(0, 0, 255).toRGBColor(),
-                new EColor(0, 255, 255).toRGBColor(),
-                new EColor(255, 255, 0).toRGBColor(),
-                new EColor(255, 0, 255).toRGBColor()
-            ])
-        ];
-
-        const html = `<div class="content1">
-            <div class="preview" style="display: flex; gap: 6px;">
-                <div style="flex-grow: 2; border: 1px solid #ccc; background-color: ${color}"></div>
-                <input size="12" value="${color}" />
-                <button style="min-width: 60px;">${this.labels?.apply}</button>
-            </div>
-            <div class="color-more">${colors
-                .map(
-                    (c) =>
-                        `<div class="color-circle" style="background-color: ${c}">${
-                            c === 'transparent' ? 'T' : ''
-                        }</div>`
-                )
-                .join('')}</div>
-            <div class="color-container">
-                <div id="color-preview" style="height: 200; width: 40px;"></div>
-                <canvas id="color-block" height="200" width="200"></canvas>
-                <canvas id="color-strip" height="200" width="40"></canvas>
-            </div>
-        </div>`;
-
-        this.popupContent(html, undefined, popup);
-
-        const previewDiv = popup.querySelector<HTMLDivElement>('div.preview')!;
-        const div = previewDiv.querySelector('div')!;
-
-        const input = previewDiv.querySelector('input')!;
-        input.addEventListener('change', () => {
-            div.style.backgroundColor = input.value;
-        });
-
-        const button = previewDiv.querySelector('button')!;
-        button.addEventListener('click', () => {
-            const colorText = input.value.trim();
-            if (!colorText) {
-                input.focus();
-                return;
-            }
-            const color = EColor.parse(colorText)?.toRGBColor();
-            if (color == null) {
-                input.focus();
-                return;
-            }
-
-            returnColor(color);
-        });
-
-        const returnColor = (color: string) => {
-            // Add to favorite colors
-            const index = favoriteColors.indexOf(color);
-            if (index !== 0) {
-                if (index !== -1) {
-                    favoriteColors.splice(index, 1);
-                }
-
-                favoriteColors.unshift(color);
-                if (favoriteColors.length > 16) favoriteColors.pop();
-
-                window.localStorage.setItem(
-                    EOEditor.FavoriteColorsKey,
-                    JSON.stringify(favoriteColors)
-                );
-            }
-
-            callback(color);
-
-            popup!.hide();
-        };
-
-        const colorPreview =
-            popup.querySelector<HTMLDivElement>('#color-preview')!;
-
-        const colorBlock =
-            popup.querySelector<HTMLCanvasElement>('canvas#color-block')!;
-        const ctx = colorBlock.getContext('2d')!;
-
-        const previewColor = (event: MouseEvent) => {
-            const color = this.getPointColor(event);
-            colorPreview.style.backgroundColor = color;
-        };
-
-        const setColor = (event: MouseEvent) => {
-            const color = this.getPointColor(event);
-            div.style.backgroundColor = color;
-            input.value = color;
-            return color;
-        };
-
-        colorBlock.addEventListener('mousemove', previewColor);
-        colorBlock.addEventListener('click', setColor);
-
-        popup
-            .querySelectorAll<HTMLDivElement>('div.color-circle')
-            .forEach((div) => {
-                div.addEventListener('click', () => {
-                    returnColor(div.style.backgroundColor);
-                });
-            });
-
-        const colorStrip =
-            popup.querySelector<HTMLCanvasElement>('canvas#color-strip')!;
-        colorStrip.addEventListener('click', (event) => {
-            const color = setColor(event);
-            fillGradient(color);
-        });
-        colorStrip.addEventListener('mousemove', previewColor);
-
-        this.createColorStrip(colorStrip);
-
-        const fillGradient = (color: string) => {
-            colorPreview.style.backgroundColor = color;
-
-            const { width, height } = colorBlock;
-
-            ctx.fillStyle = color;
-            ctx.fillRect(0, 0, width, height);
-
-            var grdWhite = ctx.createLinearGradient(0, 0, width, 0);
-            grdWhite.addColorStop(0, 'rgba(255,255,255,1)');
-            grdWhite.addColorStop(1, 'rgba(255,255,255,0)');
-            ctx.fillStyle = grdWhite;
-            ctx.fillRect(0, 0, width, height);
-
-            var grdBlack = ctx.createLinearGradient(0, 0, 0, height);
-            grdBlack.addColorStop(0, 'rgba(0,0,0,0)');
-            grdBlack.addColorStop(1, 'rgba(0,0,0,1)');
-            ctx.fillStyle = grdBlack;
-            ctx.fillRect(0, 0, width, height);
-        };
-
-        fillGradient('rgba(255,0,0,1)');
-    }
-
-    private getPointColor(event: MouseEvent) {
-        const ctx = (event.target as HTMLCanvasElement).getContext('2d')!;
-        const data = ctx.getImageData(event.offsetX, event.offsetY, 1, 1).data;
-        return `rgb(${data.slice(0, 3).join(', ')})`;
-    }
-
-    private createColorStrip(canvas: HTMLCanvasElement) {
-        const ctx = canvas.getContext('2d')!;
-        const { width, height } = canvas;
-
-        ctx.rect(0, 0, width, height);
-        var grd1 = ctx.createLinearGradient(0, 0, 0, height);
-        grd1.addColorStop(0, 'rgb(255, 0, 0)');
-        grd1.addColorStop(0.17, 'rgb(255, 255, 0)');
-        grd1.addColorStop(0.34, 'rgb(0, 255, 0)');
-        grd1.addColorStop(0.51, 'rgb(0, 255, 255)');
-        grd1.addColorStop(0.68, 'rgb(0, 0, 255)');
-        grd1.addColorStop(0.85, 'rgb(255, 0, 255)');
-        grd1.addColorStop(1, 'rgb(255, 0, 0)');
-        ctx.fillStyle = grd1;
-        ctx.fill();
+    popupColors(color: string | undefined, callback: (color: string) => void) {
+        this.palette.popup(color, callback, this._lastClickedButton?.rect);
     }
 
     /**
-     * Popup content
+     * Popup HTML content
      * @param content HTML content
      * @param ready Ready callback
-     * @param popup EOPopup
      */
-    popupContent(content: string, ready?: () => void, popup?: EOPopup) {
-        (popup ?? this.popup).show(
-            content,
-            this._lastClickedButton?.rect,
-            ready
-        );
+    popupContent(content: string, ready?: () => void) {
+        this.popup.show(content, this._lastClickedButton?.rect, ready);
     }
 
     /**
@@ -2660,15 +2580,16 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     /**
      * Popup icons
      * @param icons Icons
+     * @param ready Callback
      */
-    popupIcons(icons: IEOEditorIconCommand[]) {
+    popupIcons(icons: IEOEditorIconCommand[], ready?: () => void) {
         const html = icons
             .map((s) => {
                 return this.createButtonSimple(s.name, s.label, s.icon);
             })
             .join('');
 
-        this.popupContent(`<div class="icons">${html}</div>`);
+        this.popupContent(`<div class="icons">${html}</div>`, ready);
 
         this.popup.querySelectorAll('button').forEach((b) => {
             const command = icons.find((icon) => icon.name === b.name);
@@ -2904,6 +2825,46 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             });
     }
 
+    private tableSplitCell(callback: (isRow: boolean, qty: number) => void) {
+        const labels = this.labels!;
+        const html = `<div class="grid">
+            <div class="grid-title">${labels.tableSplitCell}</div>
+
+            <div class="full-width">
+                <label><input type="radio" name="isRow" value="0" checked/>${labels.tableSplitColumns}</label>
+                <label><input type="radio" name="isRow" value="1"/>${labels.tableSplitRows}</label>
+            </div>
+
+            <label for="qty">${labels.qty}</label>
+            <input type="number" class="span3" id="qty" min="2" max="100" value="2"/>
+
+            <div class="full-width"><button class="full-width" name="apply">${labels.apply}</button></div>
+        </div>`;
+
+        this.popupContent(html);
+
+        this.popup
+            .querySelector('button[name="apply"]')
+            ?.addEventListener('click', () => {
+                const isRow =
+                    this.popup.querySelector<HTMLInputElement>(
+                        'input[name="isRow"]:checked'
+                    )?.value === '1';
+
+                const qtyInput =
+                    this.popup.querySelector<HTMLInputElement>('#qty')!;
+                const qty = qtyInput.valueAsNumber;
+                if (qty == null || qty < 2) {
+                    qtyInput.focus();
+                    return;
+                }
+
+                this.popup.hide();
+
+                callback(isRow, qty);
+            });
+    }
+
     private toggleSource() {
         // Source button
         const button = this.buttons.source;
@@ -3004,6 +2965,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 <input id="imageFile" type="file" multiple accept="image/*" style="width: 200px; opacity: 0">
             </div>
             <div>
+                <label><input type="radio" name="way" value="2"/>${
+                    labels.imageCreation
+                }</label>
+            </div>
+            <div>
                 <label><input type="radio" name="way" value="1"/>${
                     labels.byURL
                 }</label>
@@ -3017,9 +2983,18 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     <button id="next" disabled>${labels.next}</button>
                 </div>    
                 <div id="summary"></div>
-                <button class="icon-button" name="edit" disabled>${this.createSVG(
-                    EOEditorSVGs.edit
-                )}<span>${labels.edit}</span></button>
+                <div>
+                    <button title="${
+                        labels.delete
+                    }" name="delete" disabled>${this.createSVG(
+            EOEditorCommands.delete.icon
+        )}</button>
+                    <button title="${
+                        labels.edit
+                    }" name="edit" disabled>${this.createSVG(
+            EOEditorSVGs.edit
+        )}</button>
+                </div>
             </div>
             <div class="full-width"><button class="full-width" name="apply" disabled>${
                 labels.apply
@@ -3029,28 +3004,29 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
         let index = -1;
         let imagesCount = 0;
-        const initImage = (image: HTMLImageElement | null, count: number) => {
+        const initImage = (image: HTMLImageElement | null, add: number) => {
             if (image == null) return;
-            image.style.display = 'block';
-            index = 0;
 
-            if (image.width > 0) setSize(image);
+            imagesCount += add;
 
-            imagesCount = count;
-
-            if (count > 1) {
-                pButton.disabled = true;
-                nButton.disabled = false;
-            } else {
-                pButton.disabled = true;
-                nButton.disabled = true;
+            if (index === -1) {
+                index = 0;
             }
+
+            doItem(index);
+
+            setStatus();
         };
 
-        const setSize = (image: HTMLImageElement) => {
-            this.popup.querySelector(
-                'div#summary'
-            )!.innerHTML = `${image.width} x ${image.height}`;
+        const setStatus = () => {
+            applyButton.disabled = imagesCount === 0;
+            editButton.disabled = applyButton.disabled;
+            deleteButton.disabled = applyButton.disabled;
+        };
+
+        const setSize = (image: HTMLImageElement | null) => {
+            this.popup.querySelector('div#summary')!.innerHTML =
+                image == null ? '' : `${image.width} x ${image.height}`;
         };
 
         const doPrevious = () => {
@@ -3073,9 +3049,27 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             image.style.display = 'block';
 
             if (image.width > 0) setSize(image);
+            else {
+                image.addEventListener(
+                    'load',
+                    (event) => {
+                        setSize(event.target as HTMLImageElement);
+                    },
+                    { once: true }
+                );
+            }
 
             pButton.disabled = index < 1;
             nButton.disabled = index + 1 >= imagesCount;
+        };
+
+        const addImage = (data: string, alt?: string, add?: number) => {
+            const image = document.createElement('img');
+            image.src = data;
+            if (alt) image.alt = alt;
+            previewDiv.appendChild(image);
+
+            initImage(image, add ?? 1);
         };
 
         const radios = this.popup.querySelectorAll<HTMLInputElement>(
@@ -3083,6 +3077,18 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         )!;
         const fileInput =
             this.popup.querySelector<HTMLInputElement>('input[type="file"]')!;
+        const imageCreation = this.popup.querySelector<HTMLInputElement>(
+            'input[name="way"][value="2"]'
+        );
+        if (imageCreation) {
+            imageCreation.addEventListener('click', () => {
+                if (imageCreation.checked) {
+                    this.imageEditor.open(null, (data) => {
+                        addImage(data);
+                    });
+                }
+            });
+        }
         const urlInput =
             this.popup.querySelector<HTMLTextAreaElement>('textarea')!;
         const pButton =
@@ -3096,9 +3102,29 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         const applyButton = this.popup.querySelector<HTMLButtonElement>(
             'button[name="apply"]'
         )!;
+        const deleteButton = this.popup.querySelector<HTMLButtonElement>(
+            'button[name="delete"]'
+        )!;
+        deleteButton.addEventListener('click', () => {
+            const image = previewDiv.querySelectorAll('img').item(index);
+            image.remove();
+            imagesCount--;
+            if (imagesCount === 0) {
+                setStatus();
+                setSize(null);
+                index = -1;
+            } else {
+                if (index === imagesCount) index = 0;
+                doItem(index);
+            }
+        });
         const editButton = this.popup.querySelector<HTMLButtonElement>(
             'button[name="edit"]'
         )!;
+        editButton.addEventListener('click', () => {
+            const image = previewDiv.querySelectorAll('img').item(index);
+            this.editImage(image, (data) => (image.src = data));
+        });
 
         applyButton?.addEventListener('click', () => {
             this.popup.hide();
@@ -3110,6 +3136,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             this.insertHTML(imgs);
         });
 
+        const loadFile = (file: File) => {
+            if (!file.type.startsWith('image/')) return;
+            DomUtils.fileToDataURL(file).then((data) => {
+                addImage(data, file.name);
+            });
+        };
+
         fileInput.addEventListener('click', () => {
             radios.item(0).checked = true;
         });
@@ -3117,31 +3150,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             const files = fileInput.files;
             if (files == null || files.length === 0) return;
 
-            previewDiv.innerHTML = '';
-            applyButton.disabled = true;
-            editButton.disabled = true;
-
-            let count = 0;
             for (const file of files) {
-                if (!file.type.startsWith('image/')) continue;
-                count++;
-
-                this.readAsDataURL(file, (data) => {
-                    const image = document.createElement('img');
-                    image.alt = file.name;
-                    image.src = data;
-                    previewDiv.appendChild(image);
-
-                    if (index === -1) {
-                        image.addEventListener('load', (event) => {
-                            setSize(event.target as HTMLImageElement);
-                        });
-                        initImage(image, count);
-
-                        applyButton.disabled = false;
-                        editButton.disabled = false;
-                    }
-                });
+                loadFile(file);
             }
         });
 
@@ -3161,11 +3171,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             index = -1;
             const images = previewDiv.querySelectorAll('img');
             if (images.length > 0) {
-                images.forEach((image) =>
-                    image.addEventListener('load', () => setSize(image))
-                );
                 initImage(images.item(0), images.length);
             }
+
+            urlInput.value = '';
         });
     }
 
@@ -3422,7 +3431,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 }
 
 // Custom element - Reusable Web Component
+customElements.get('eo-button') ||
+    customElements.define('eo-button', EOButton, { extends: 'button' });
+customElements.get('eo-image-editor') ||
+    customElements.define('eo-image-editor', EOImageEditor);
 customElements.define('eo-editor', EOEditor);
-customElements.define('eo-popup', EOPopup);
-customElements.define('eo-button', EOButton, { extends: 'button' });
-customElements.define('eo-image-editor', EOImageEditor);

@@ -122,3 +122,5 @@ export class EOButton extends HTMLButtonElement {
         tooltipDiv.style.top = `${rect.bottom + 4}px`;
     }
 }
+
+customElements.define('eo-button', EOButton, { extends: 'button' });

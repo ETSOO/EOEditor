@@ -35,11 +35,8 @@ jobs:
       # ci vs install
       - run: npm install
 
-      # Make sure pass the test without any exception
-      - run: npm test
-
       # Build the package
-      - run: npm run build
+      - run: npm run tsc
 
       # Publish to npm
       # For scoped package, make it public for free service

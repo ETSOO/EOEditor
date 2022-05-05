@@ -8,7 +8,16 @@
         <meta name="description" content="ETSOO Free WYSIWYG HTML Editor" />
         <title>EOEditor</title>
         <script src="eoeditor.js"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Water+Brush&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Liu+Jian+Mao+Cao&display=swap"
+            rel="stylesheet"
+        />
         <style>
+            /* https://fonts.google.com/?subset=chinese-simplified */
             h2.red {
                 color: #ff0000;
             }
@@ -22,7 +31,11 @@
         <form
             onsubmit="document.querySelector('eo-editor').name = 'newName'; return false;"
         >
-            <eo-editor name="description" language="zh-CN">
+            <eo-editor
+                name="description"
+                language="zh-CN"
+                activeColor="#ff0000"
+            >
                 <p>Editor content: <b>Hello, world!</b></p>
                 <h2>H2 Text</h2>
                 <p>
@@ -38,19 +51,19 @@
                     <tbody>
                         <tr>
                             <td colspan="2">Row1</td>
-                            <td rowspan="3">TD 2</td>
+                            <td rowspan="3">TD 1/2</td>
                         </tr>
                         <tr>
                             <td rowspan="2">Row2</td>
-                            <td>TD 2</td>
+                            <td>TD 2/2</td>
                         </tr>
                         <tr>
                             <td>Row3</td>
                         </tr>
                         <tr>
                             <td>Row4</td>
-                            <td>TD 2</td>
-                            <td>TD 3</td>
+                            <td>TD 4/2</td>
+                            <td>TD 4/3</td>
                         </tr>
                     </tbody>
                 </table>

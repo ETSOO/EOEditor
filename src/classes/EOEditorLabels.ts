@@ -1,3 +1,4 @@
+import { DataTypes, DomUtils } from '@etsoo/shared';
 import { EOEditorCommandKey } from './EOEditorCommand';
 
 /**
@@ -23,6 +24,7 @@ export type EOEditorLabelLanguage = {
     gradient: string;
     height: string;
     image: string;
+    imageCreation: string;
     linkTargetNew: string;
     linkTitle: string;
     linkURL: string;
@@ -32,6 +34,7 @@ export type EOEditorLabelLanguage = {
     padding: string;
     position: string;
     previous: string;
+    qty: string;
     repeat: string;
     sameValue: string;
     sides: string;
@@ -50,25 +53,19 @@ export type EOEditorLabelLanguage = {
     tableRowAddBefore: string;
     tableRowRemove: string;
     tableSplitCell: string;
+    tableSplitColumns: string;
+    tableSplitRows: string;
     to: string;
     uploadFromComputer: string;
     width: string;
     yes: string;
 };
 
-// EOEditor label languages
-const EOEditorLabelLanguages = ['zh-CN', 'en-US'] as const;
-type EOEditorLabelLanguageNames = typeof EOEditorLabelLanguages[number];
-
-type EOEditorLabelsType = {
-    [index in EOEditorLabelLanguageNames]: EOEditorLabelLanguage;
-};
-
-/**
- * EOEditor labels
- */
-export const EOEditorLabels: EOEditorLabelsType = {
-    'zh-CN': {
+const zhCN: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
+    name: 'zh-CN',
+    label: '简体中文',
+    compatibleName: ['zh-SG'],
+    resources: {
         about: '关于EOEditor',
         aboutContent:
             '<p>源代码库: <a href="https://github.com/ETSOO/EOEditor" target="_blank">GitHub</a><br/><a href="https://www.etsoo.com" target="_blank">亿速思维</a>© 版权所有 (2004-2022)</p>',
@@ -109,6 +106,7 @@ export const EOEditorLabels: EOEditorLabelsType = {
         hp: '普通文本',
         iframe: '嵌入窗口',
         image: '图片',
+        imageCreation: '图片创作',
         increaseFontSize: '增大字号',
         indent: '增加缩进',
         insertHorizontalRule: '插入横线',
@@ -136,6 +134,7 @@ export const EOEditorLabels: EOEditorLabelsType = {
         paste: '黏贴 (Ctrl+V)',
         position: '位置',
         previous: '上一张',
+        qty: '数量',
         redo: '重做 (Ctrl+Y)',
         removeFormat: '清除格式',
         repeat: '重复',
@@ -150,8 +149,8 @@ export const EOEditorLabels: EOEditorLabelsType = {
         superscript: '上标',
         symbols: '特殊字符',
         table: '表格',
-        tableColumnAddAfter: '向左插入列',
-        tableColumnAddBefore: '向右插入列',
+        tableColumnAddAfter: '向右插入列',
+        tableColumnAddBefore: '向左插入列',
         tableColumnRemove: '移除列',
         tableBorder: '全局边框',
         tableBorderCollapse: '边框合并',
@@ -159,10 +158,12 @@ export const EOEditorLabels: EOEditorLabelsType = {
         tableLayouts: '自动|固定',
         tableMergeCells: '合并单元格',
         tableProperties: '表格属性',
-        tableRowAddAfter: '在上方插入行',
-        tableRowAddBefore: '在下方插入行',
+        tableRowAddAfter: '在下方插入行',
+        tableRowAddBefore: '在上方插入行',
         tableRowRemove: '移除行',
         tableSplitCell: '拆分单元格',
+        tableSplitColumns: '拆分为列',
+        tableSplitRows: '拆分为行',
         textbox: '文本框',
         to: '往',
         underline: '下划线 (Ctrl+U)',
@@ -172,8 +173,128 @@ export const EOEditorLabels: EOEditorLabelsType = {
         video: '音频/视频/网页代码',
         width: '宽度',
         yes: '是'
-    },
-    'en-US': {
+    }
+};
+
+const zhHK: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
+    name: 'zh-hk',
+    label: '繁體中文',
+    compatibleName: ['zh-TW', 'zh-MO'],
+    resources: {
+        about: '關於EOEditor',
+        aboutContent:
+            '<p>源代碼庫: <a href="https://github.com/ETSOO/EOEditor" target="_blank">GitHub</a><br/><a href="https://www.etsoo.com" target="_blank">億速思維</a>© 版權所有 (2004-2022)</p>',
+        align: '對齊',
+        allowfullscreen: '允許全屏',
+        apply: '應用',
+        backColor: '背景色',
+        backgroundImage: '背景圖片',
+        bgColor: '背景色',
+        bold: '加粗 (Ctrl+B)',
+        border: '邊框',
+        borderStyle: '邊框樣式',
+        borderRadius: '圓角半徑',
+        byURL: '網址',
+        caption: '標題',
+        className: '類名',
+        code: '程序代碼',
+        color: '顏色',
+        copy: '複製 (Ctrl+C)',
+        custom1: '自定義1',
+        custom2: '自定義2',
+        custom3: '自定義3',
+        cut: '剪切 (Ctrl+X)',
+        decreaseFontSize: '減少字號',
+        delete: '刪除',
+        edit: '編輯',
+        float: '浮動',
+        foreColor: '文字顏色',
+        formatBlock: '樣式',
+        gradient: '漸變色',
+        h1: '標題1',
+        h2: '標題2',
+        h3: '標題3',
+        h4: '標題4',
+        h5: '標題5',
+        h6: '標題6',
+        height: '高度',
+        hp: '普通文本',
+        iframe: '嵌入窗口',
+        image: '圖片',
+        imageCreation: '圖片創作',
+        increaseFontSize: '增大字號',
+        indent: '增加縮進',
+        insertHorizontalRule: '插入橫線',
+        insertImage: '插入圖片',
+        insertOrderedList: '插入有序列表',
+        insertText: '黏貼為純文本 (Ctrl+Shift+V)',
+        insertUnorderedList: '插入無序列表',
+        italic: '斜體 (Ctrl+I)',
+        justifyCenter: '居中',
+        justifyFull: '兩端對齊',
+        justifyLeft: '左對齊',
+        justifyRight: '右對齊',
+        link: '超鏈接',
+        insertTable: '插入表格',
+        linkTargetNew: '新窗口',
+        linkTitle: '標題',
+        linkURL: '網址',
+        margin: '外邊距',
+        more: '更多',
+        next: '下一張',
+        none: '無',
+        object: '對象',
+        outdent: '減少縮進',
+        padding: '內邊距',
+        paste: '黏貼 (Ctrl+V)',
+        position: '位置',
+        previous: '上一張',
+        qty: '數量',
+        redo: '重做 (Ctrl+Y)',
+        removeFormat: '清除格式',
+        repeat: '重複',
+        s: '分隔線',
+        sameValue: '相同設置',
+        sides: '上|右|下|左',
+        source: 'HTML源代碼',
+        specialCharacterCategories: '常用符號|標點符號|箭頭|貨幣|數學符號|數字',
+        strikeThrough: '刪除線',
+        style: 'CSS樣式',
+        subscript: '下標',
+        superscript: '上標',
+        symbols: '特殊字符',
+        table: '表格',
+        tableColumnAddAfter: '向右插入列',
+        tableColumnAddBefore: '向左插入列',
+        tableColumnRemove: '移除列',
+        tableBorder: '全局邊框',
+        tableBorderCollapse: '邊框合併',
+        tableLayout: '表格佈局',
+        tableLayouts: '自動|固定',
+        tableMergeCells: '合併單元格',
+        tableProperties: '表格屬性',
+        tableRowAddAfter: '在下方插入行',
+        tableRowAddBefore: '在上方插入行',
+        tableRowRemove: '移除行',
+        tableSplitCell: '拆分單元格',
+        tableSplitColumns: '拆分為列',
+        tableSplitRows: '拆分為行',
+        textbox: '文本框',
+        to: '往',
+        underline: '下劃線 (Ctrl+U)',
+        undo: '撤銷 (Ctrl+Z)',
+        unlink: '刪除鏈接',
+        uploadFromComputer: '從電腦上傳',
+        video: '音頻/視頻/網頁代碼',
+        width: '寬度',
+        yes: '是'
+    }
+};
+
+const enUS: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
+    name: 'en-US',
+    label: 'English',
+    resources: {
         about: 'About EOEditor',
         aboutContent:
             '<p>Source repository: <a href="https://github.com/ETSOO/EOEditor" target="_blank">GitHub</a><br/>Copyright © <a href="https://www.etsoo.com" target="_blank">ETSOO</a> (2004-2022)</p>',
@@ -214,6 +335,7 @@ export const EOEditorLabels: EOEditorLabelsType = {
         hp: 'Normal text',
         iframe: 'Embeded window',
         image: 'Image',
+        imageCreation: 'Image creation',
         increaseFontSize: 'Increase font size',
         indent: 'Increase indent',
         insertHorizontalRule: 'Horitontal line',
@@ -241,6 +363,7 @@ export const EOEditorLabels: EOEditorLabelsType = {
         paste: 'Paste (Ctrl+V)',
         position: 'Position',
         previous: 'Previous',
+        qty: 'Qty',
         redo: 'Redo (Ctrl+Y)',
         removeFormat: 'Clear format',
         repeat: 'Repeat',
@@ -256,8 +379,8 @@ export const EOEditorLabels: EOEditorLabelsType = {
         superscript: 'Superscript',
         symbols: 'Special charaters',
         table: 'Table',
-        tableColumnAddAfter: 'Insert column to the left',
-        tableColumnAddBefore: 'Insert column to the right',
+        tableColumnAddAfter: 'Insert column to the right',
+        tableColumnAddBefore: 'Insert column to the left',
         tableColumnRemove: 'Remove the column',
         tableBorder: 'Global border',
         tableBorderCollapse: 'Collapse',
@@ -269,6 +392,8 @@ export const EOEditorLabels: EOEditorLabelsType = {
         tableRowAddBefore: 'Insert row above',
         tableRowRemove: 'Remove the row',
         tableSplitCell: 'Split the cell',
+        tableSplitColumns: 'Split into columns',
+        tableSplitRows: 'Split into rows',
         textbox: 'Text box',
         to: 'To',
         underline: 'Underline (Ctrl+U)',
@@ -287,13 +412,8 @@ export const EOEditorLabels: EOEditorLabelsType = {
  * @returns Language labels
  */
 export function EOEditorGetLabels(language: string) {
-    let l = EOEditorLabelLanguages.find(
-        (item) => item === language || item.split('|').includes(language)
+    return (
+        DomUtils.getCulture([zhCN, zhHK, enUS], language)?.resources ??
+        enUS.resources
     );
-    if (l == null) {
-        const first = language.split('-')[0] + '-';
-        l = EOEditorLabelLanguages.find((item) => item.startsWith(first));
-        if (l == null) l = 'en-US';
-    }
-    return EOEditorLabels[l];
 }
