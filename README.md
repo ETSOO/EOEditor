@@ -2,7 +2,8 @@
  ETSOO Free WYSIWYG HTML Editor
  亿速思维免费提供的所见即所的HTML编辑器
 
- Access to https://jsfiddle.net/wfv76m14/1/ to have a quick look.
+ Access to https://jsfiddle.net/q2mhLufr/ for a quick look.
+ 访问网址 https://jsfiddle.net/q2mhLufr/ 在线快速预览。
 
 ## Support / 支持 ##
 - Browsers since 2019 (ES2019+), no Internet Exployer support.
