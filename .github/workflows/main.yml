@@ -35,6 +35,9 @@ jobs:
       # ci vs install
       - run: npm install
 
+      # Build the JS
+      - run: npm run build
+
       # Build the package
       - run: npm run tsc
 

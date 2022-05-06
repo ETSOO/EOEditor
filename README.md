@@ -28,7 +28,9 @@ $ yarn add @etsoo/editor
 ```
 
 Using web:
-Download the script from "dist/eoeditor.js" or use CDN
+Download the script from "dist/eoeditor.js" or use CDN for the latest version.Replace @latest with a specific version like @1.0.5 for it.
+https://cdn.jsdelivr.net/gh/etsoo/eoeditor/dist/eoeditor.js or
+https://cdn.jsdelivr.net/npm/@etsoo/editor@latest/dist/eoeditor.js
 ```html
 <script src="https://cdn.jsdelivr.net/gh/etsoo/eoeditor/dist/eoeditor.js"></script>
 <eo-editor name="content">
