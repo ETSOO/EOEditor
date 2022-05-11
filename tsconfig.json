@@ -10,8 +10,6 @@
         "declaration": true,
         "noEmit": false,
         "esModuleInterop": true,
-        "importHelpers": true,
-        "downlevelIteration": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
         "skipLibCheck": true
