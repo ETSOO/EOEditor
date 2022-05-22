@@ -30,7 +30,11 @@ module.exports = {
     },
     optimization: {
         minimize: true,
-        minimizer: [new TerserPlugin()]
+        minimizer: [
+            new TerserPlugin({
+                extractComments: false
+            })
+        ]
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.jsx']

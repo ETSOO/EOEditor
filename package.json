@@ -1,6 +1,6 @@
 {
     "name": "@etsoo/editor",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "ETSOO Free WYSIWYG HTML Editor",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -41,11 +41,11 @@
         ]
     },
     "devDependencies": {
-        "@babel/core": "^7.17.10",
-        "@babel/plugin-proposal-class-properties": "^7.16.7",
-        "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
-        "@babel/preset-env": "^7.17.10",
-        "@babel/preset-typescript": "^7.16.7",
+        "@babel/core": "^7.18.0",
+        "@babel/plugin-proposal-class-properties": "^7.17.12",
+        "@babel/plugin-proposal-object-rest-spread": "^7.18.0",
+        "@babel/preset-env": "^7.18.0",
+        "@babel/preset-typescript": "^7.17.12",
         "babel-loader": "^8.2.5",
         "prettier": "2.6.2",
         "terser-webpack-plugin": "^5.3.1",
@@ -55,7 +55,7 @@
         "webpack-dev-server": "^4.9.0"
     },
     "dependencies": {
-        "@etsoo/shared": "^1.1.37",
+        "@etsoo/shared": "^1.1.38",
         "@types/fabric": "^4.5.7",
         "fabric": "^5.2.1"
     }
