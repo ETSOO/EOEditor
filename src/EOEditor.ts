@@ -810,13 +810,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         if (win == null) {
             this.editorFrame.addEventListener(
                 'load',
-                () => this.setContent(this.editorFrame.contentWindow!),
+                () => this.initContent(this.editorFrame.contentWindow!),
                 {
                     once: true
                 }
             );
         } else {
-            this.setContent(win);
+            this.initContent(win);
         }
     }
 
@@ -825,7 +825,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.palette.hide();
     }
 
-    private setContent(win: Window) {
+    private initContent(win: Window) {
         this._editorWindow = win;
         const doc = win.document;
 
@@ -841,6 +841,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 'beforeend',
                 `<style>
                     body {
+                        background-color: #fff;
                         margin: 0px;
                         padding: 0.5em;
                     }
@@ -1519,6 +1520,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     getContent() {
         this.clearHighlights();
         return this.innerHTML;
+    }
+
+    /**
+     * Set content
+     * @param content New contebt
+     */
+    setContent(content: string) {
+        this.innerHTML = content;
     }
 
     private onFormSubmit() {

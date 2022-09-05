@@ -274,6 +274,12 @@ export interface IEOEditor {
     restoreFocus(): void;
 
     /**
+     * Set content
+     * @param content New contebt
+     */
+    setContent(content: string): void;
+
+    /**
      * Let first range surround node
      * @param tagName New node tagname
      * @param excludedParents Excluded parent tagnames
