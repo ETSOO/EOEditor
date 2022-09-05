@@ -382,7 +382,7 @@ export const EOEditorCommands: IEOEditorCommands = {
     }
 };
 
-export function EOEditorCommandsParse(commands: string | null) {
+export function EOEditorCommandsParse(commands: string | null | undefined) {
     const items: EOEditorCommandsArray = commands?.startsWith('[')
         ? JSON.parse(commands)
         : commands === 'simple'

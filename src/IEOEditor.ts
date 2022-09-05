@@ -83,47 +83,47 @@ export interface IEOEditor {
     /**
      * Name for the hidden form input
      */
-    name: string | null;
+    name?: string | null;
 
     /**
      * Clone styles
      */
-    cloneStyles: string | boolean | null;
+    cloneStyles?: string | boolean | null;
 
     /**
      * Commands, a supported collection or commands array like ['redo', 'undo']
      */
-    commands: string | null;
+    commands?: string | null;
 
     /**
      * Main color
      */
-    color: string | null;
+    color?: string | null;
 
     /**
      * Active color
      */
-    activeColor: string | null;
+    activeColor?: string | null;
 
     /**
      * Width of the editor
      */
-    width: string | null;
+    width?: string | null;
 
     /**
      * Height of the editor
      */
-    height: string | null;
+    height?: string | null;
 
     /**
      * Style with CSS or tag
      */
-    styleWithCSS: string | boolean | null;
+    styleWithCSS?: string | boolean | null;
 
     /**
      * Language of the UI, like en-US, zh-CN, zh-HK
      */
-    language: string | null;
+    language?: string | null;
 
     /**
      * Backup editor content

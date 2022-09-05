@@ -437,7 +437,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get name() {
         return this.getAttribute('name');
     }
-    set name(value: string | null) {
+    set name(value: string | null | undefined) {
         if (value) this.setAttribute('name', value);
         else this.removeAttribute('name');
     }
@@ -448,7 +448,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get cloneStyles() {
         return this.getAttribute('cloneStyles');
     }
-    set cloneStyles(value: string | boolean | null) {
+    set cloneStyles(value: string | boolean | null | undefined) {
         if (value) this.setAttribute('cloneStyles', value.toString());
         else this.removeAttribute('cloneStyles');
     }
@@ -459,7 +459,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get commands() {
         return this.getAttribute('commands');
     }
-    set commands(value: string | null) {
+    set commands(value: string | null | undefined) {
         if (value) this.setAttribute('commands', value);
         else this.removeAttribute('commands');
     }
@@ -470,7 +470,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get color() {
         return this.getAttribute('color');
     }
-    set color(value: string | null) {
+    set color(value: string | null | undefined) {
         if (value) this.setAttribute('color', value);
         else this.removeAttribute('color');
     }
@@ -481,7 +481,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get activeColor() {
         return this.getAttribute('activeColor');
     }
-    set activeColor(value: string | null) {
+    set activeColor(value: string | null | undefined) {
         if (value) this.setAttribute('activeColor', value);
         else this.removeAttribute('activeColor');
     }
@@ -492,7 +492,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get width() {
         return this.getAttribute('width');
     }
-    set width(value: string | null) {
+    set width(value: string | null | undefined) {
         if (value) this.setAttribute('width', value);
         else this.removeAttribute('width');
     }
@@ -503,7 +503,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get height() {
         return this.getAttribute('height');
     }
-    set height(value: string | null) {
+    set height(value: string | null | undefined) {
         if (value) this.setAttribute('height', value);
         else this.removeAttribute('height');
     }
@@ -514,7 +514,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get styleWithCSS() {
         return this.getAttribute('styleWithCSS');
     }
-    set styleWithCSS(value: string | boolean | null) {
+    set styleWithCSS(value: string | boolean | null | undefined) {
         if (value) this.setAttribute('styleWithCSS', value.toString());
         else this.removeAttribute('styleWithCSS');
     }
@@ -525,7 +525,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     get language() {
         return this.getAttribute('language');
     }
-    set language(value: string | null) {
+    set language(value: string | null | undefined) {
         if (value) this.setAttribute('language', value);
         else this.removeAttribute('language');
     }
@@ -806,13 +806,18 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         }
 
         // Once
-        document.addEventListener(
-            'DOMContentLoaded',
-            () => {
-                this.setContent();
-            },
-            { once: true }
-        );
+        const win = this.editorFrame.contentWindow;
+        if (win == null) {
+            this.editorFrame.addEventListener(
+                'load',
+                () => this.setContent(this.editorFrame.contentWindow!),
+                {
+                    once: true
+                }
+            );
+        } else {
+            this.setContent(win);
+        }
     }
 
     private closePopups() {
@@ -820,9 +825,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.palette.hide();
     }
 
-    private setContent() {
-        const win = this.editorFrame.contentWindow;
-        if (win == null) return;
+    private setContent(win: Window) {
         this._editorWindow = win;
         const doc = win.document;
 
