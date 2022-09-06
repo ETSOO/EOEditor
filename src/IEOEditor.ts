@@ -111,6 +111,11 @@ export interface IEOEditor {
     activeColor?: string | null;
 
     /**
+     * Editor's value, alias of content
+     */
+    value?: string | null;
+
+    /**
      * Width of the editor
      */
     width?: string | number | null;

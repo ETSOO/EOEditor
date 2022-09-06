@@ -319,7 +319,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             'height',
             'color',
             'activeColor',
-            'content'
+            'content',
+            'value'
         ];
     }
 
@@ -487,6 +488,16 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     /**
+     * Get or set editor's value, alias of content
+     */
+    get value() {
+        return this.content;
+    }
+    set value(value: string | null | undefined) {
+        this.content = value;
+    }
+
+    /**
      * Main color
      */
     get color() {
@@ -597,7 +608,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.backupSeed = window.setTimeout(() => {
             if (this.content) {
                 window.localStorage.setItem(this.getBackupName(), this.content);
-                this.dispatchEvent(new Event('backup'));
+                this.dispatchEvent(new Event('change'));
             }
         }, miliseconds);
     }

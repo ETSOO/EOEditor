@@ -47,6 +47,39 @@ if (editor) {
 </script>
 ```
 
+Using ReactJs:
+React component wrapper EOEditorEx, or install '@etsoo/reacteoeditor'
+```javascript
+import { EOEditor, IEOEditor } from '@etsoo/editor';
+import React from 'react';
+
+/**
+ * EOEditor
+ */
+export type EOEditorExProps = React.DetailedHTMLProps<
+  React.HTMLAttributes<IEOEditor>,
+  IEOEditor
+> &
+  Partial<IEOEditor>;
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      'eo-editor': EOEditorExProps;
+    }
+  }
+}
+
+// Make sure import the script
+const _editor = new EOEditor();
+
+export const EOEditorEx = React.forwardRef<IEOEditor, EOEditorExProps>(
+  (props, ref) => {
+    const { cloneStyles = false, ...rest } = props;
+    return <eo-editor cloneStyles={cloneStyles} ref={ref} {...rest} />;
+  }
+);
+```
 
 ## Properties / 属性 ##
 
@@ -71,6 +104,7 @@ if (editor) {
 |imageEditor|Image editor|
 |popup|Popup component|
 |styleWithCSS|Style with CSS or tag|
+|value|Editor's value, alias of content|
 |width|Width of the editor|
 
 ## Methods / 方法 ##
@@ -78,10 +112,12 @@ if (editor) {
 |Name|Description|
 |---:|---|
 |backup|Backup editor content|
+|clearBackup|Clear backup|
 |createElement|Create element|
 |delete|Delete selection|
 |editImage|Edit image|
 |executeCommand|Execute command|
+|getBackup|Get backup|
 |getDeepestNode|Get deepest node|
 |getFirstElement|Get first selection element|
 |getFirstElement|Get first range element|
