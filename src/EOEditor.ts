@@ -606,9 +606,12 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     backup(miliseconds: number = 1000) {
         this.clearBackupSeed();
         this.backupSeed = window.setTimeout(() => {
-            if (this.content) {
-                window.localStorage.setItem(this.getBackupName(), this.content);
-                this.dispatchEvent(new Event('change'));
+            const content = this.content;
+            if (content) {
+                window.localStorage.setItem(this.getBackupName(), content);
+                this.dispatchEvent(
+                    new CustomEvent('backup', { detail: content })
+                );
             }
         }, miliseconds);
     }
