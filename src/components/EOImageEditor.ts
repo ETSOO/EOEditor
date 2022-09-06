@@ -4,6 +4,7 @@ import {
     EOEditorHistory,
     EOEditorHistoryState
 } from '../classes/EOEditorHistory';
+import { ImageUtils } from '../ImageUtils';
 import {
     EOImageEditorGetLabels,
     EOImageEditorLabelLanguage
@@ -203,7 +204,7 @@ export class EOImageEditor extends HTMLElement {
                     z-index: 1000;
                 }
                 .modal {
-                    position: absolute;
+                    position: fixed;
                     left: 0;
                     top: 0;
                     right: 0;
@@ -1725,8 +1726,48 @@ export class EOImageEditor extends HTMLElement {
         }
     }
 
+    private setPngFormat(src: string) {
+        if (this.pngFormat) {
+            this.pngFormat.checked =
+                src.slice(-4).toLocaleLowerCase() === '.png' ||
+                src
+                    .substring(0, 15)
+                    .toLocaleLowerCase()
+                    .startsWith('data:image/png');
+        }
+    }
+
+    addImage(image: fabric.Image) {
+        const w = image.width;
+        const h = image.height;
+        if (w == null || h == null) return;
+
+        this.fc = new fabric.Canvas(this.canvas, {
+            controlsAboveOverlay: true,
+            width: w,
+            height: h
+        });
+
+        image.name = 'editingImage';
+        image.selectable = false;
+        image.hoverCursor = 'default';
+        this.fc.add(image);
+
+        const scrollbarWidth =
+            this.container.offsetWidth - this.container.clientWidth;
+        this.style.setProperty(
+            '--close-button-right',
+            scrollbarWidth > 0 ? `${scrollbarWidth + 8}px` : '8px'
+        );
+
+        this.image = image;
+
+        this.setup();
+    }
+
     /**
      * Open editor
+     * http://fabricjs.com/fabric-filters
      * @param img Image to edit
      * @param callback Callback when doen
      */
@@ -1735,42 +1776,23 @@ export class EOImageEditor extends HTMLElement {
         this.fc?.clear();
 
         if (img) {
-            fabric.Image.fromURL(img.src, (image) => {
-                const w = image.width;
-                const h = image.height;
-                if (w == null || h == null) return;
+            // default fabric.textureSize is 2048 x 2048, 4096 x 4096 probably support
+            const maxSize = 2048;
+            fabric.textureSize = maxSize;
 
-                this.fc = new fabric.Canvas(this.canvas, {
-                    controlsAboveOverlay: true,
-                    width: w,
-                    height: h
-                });
-
-                if (this.pngFormat) {
-                    this.pngFormat.checked =
-                        img.src.slice(-4).toLocaleLowerCase() === '.png' ||
-                        img.src
-                            .substring(0, 15)
-                            .toLocaleLowerCase()
-                            .startsWith('data:image/png');
-                }
-
-                image.name = 'editingImage';
-                image.selectable = false;
-                image.hoverCursor = 'default';
-                this.fc.add(image);
-
-                const scrollbarWidth =
-                    this.container.offsetWidth - this.container.clientWidth;
-                this.style.setProperty(
-                    '--close-button-right',
-                    scrollbarWidth > 0 ? `${scrollbarWidth + 8}px` : '8px'
+            if (img.width > maxSize || img.height > maxSize) {
+                ImageUtils.resize(img, ImageUtils.calcMax(img, maxSize)).then(
+                    (canvas) => {
+                        this.setPngFormat(img.src);
+                        const image = new fabric.Image(canvas);
+                        this.addImage(image);
+                    }
                 );
-
-                this.image = image;
-
-                this.setup();
-            });
+            } else {
+                const image = new fabric.Image(img);
+                this.setPngFormat(img.src);
+                this.addImage(image);
+            }
         } else {
             this.toolbar.style.visibility = 'hidden';
             this.imageSize();
@@ -2205,7 +2227,9 @@ export class EOImageEditor extends HTMLElement {
 
         this.modalDiv.querySelector<HTMLDivElement>(
             '.size-indicator'
-        )!.innerHTML = `${NumberUtils.format(w)} x ${NumberUtils.format(h)} px`;
+        )!.innerHTML = `${NumberUtils.format(
+            w.toExact(0)
+        )} x ${NumberUtils.format(h.toExact(0))} px`;
 
         const c = this.container.getBoundingClientRect();
         this.containerRect = c;

@@ -464,6 +464,21 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         else this.removeAttribute('commands');
     }
 
+    private _content?: string | null;
+
+    /**
+     * Get or set editor's content
+     */
+    get content() {
+        if (this.hidden) return this._content;
+        return this.editorWindow.document.body.innerHTML;
+    }
+    set content(content: string | null | undefined) {
+        this._content = content;
+        if (!this.hidden)
+            this.editorWindow.document.body.innerHTML = content ?? '';
+    }
+
     /**
      * Main color
      */
@@ -489,22 +504,30 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     /**
      * Width
      */
-    get width() {
+    get width(): string | null {
         return this.getAttribute('width');
     }
-    set width(value: string | null | undefined) {
-        if (value) this.setAttribute('width', value);
+    set width(value: string | number | null | undefined) {
+        if (value)
+            this.setAttribute(
+                'width',
+                typeof value === 'number' ? `${value}px` : value
+            );
         else this.removeAttribute('width');
     }
 
     /**
      * Height
      */
-    get height() {
+    get height(): string | null {
         return this.getAttribute('height');
     }
-    set height(value: string | null | undefined) {
-        if (value) this.setAttribute('height', value);
+    set height(value: string | number | null | undefined) {
+        if (value)
+            this.setAttribute(
+                'height',
+                typeof value === 'number' ? `${value}px` : value
+            );
         else this.removeAttribute('height');
     }
 
@@ -561,7 +584,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     backup(miliseconds: number = 10000) {
         this.clearBackupSeed();
         this.backupSeed = window.setTimeout(() => {
-            window.localStorage.setItem(EOEditor.BackupKey, this.innerHTML);
+            if (this.content)
+                window.localStorage.setItem(EOEditor.BackupKey, this.content);
         }, miliseconds);
     }
 
@@ -830,7 +854,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         const doc = win.document;
 
         doc.open();
-        doc.write(this.innerHTML);
+        doc.write(this._content ?? this.innerHTML);
         doc.close();
 
         if (doc.body.contentEditable !== 'true') {
@@ -1511,23 +1535,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             return element.closest('a');
         }
         return null;
-    }
-
-    /**
-     * Get content
-     * @returns Content
-     */
-    getContent() {
-        this.clearHighlights();
-        return this.innerHTML;
-    }
-
-    /**
-     * Set content
-     * @param content New contebt
-     */
-    setContent(content: string) {
-        this.innerHTML = content;
     }
 
     private onFormSubmit() {

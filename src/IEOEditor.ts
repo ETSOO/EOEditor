@@ -33,52 +33,52 @@ export interface IEOEditor {
     /**
      * All first-level buttons
      */
-    readonly buttons: Record<EOEditorCommandKey, HTMLButtonElement | undefined>;
+    get buttons(): Record<EOEditorCommandKey, HTMLButtonElement | undefined>;
 
     /**
      * Editor container
      */
-    readonly editorContainer: HTMLDivElement;
+    get editorContainer(): HTMLDivElement;
 
     /**
      * Editor hosted iframe
      */
-    readonly editorFrame: HTMLIFrameElement;
+    get editorFrame(): HTMLIFrameElement;
 
     /**
      * Editor source code textarea
      */
-    readonly editorSourceArea: HTMLTextAreaElement;
+    get editorSourceArea(): HTMLTextAreaElement;
 
     /**
      * Editor toolbar
      */
-    readonly editorToolbar: HTMLDivElement;
+    get editorToolbar(): HTMLDivElement;
 
     /**
      * Editor hosted iframe window
      */
-    readonly editorWindow: Window;
+    get editorWindow(): Window;
 
     /**
      * Editor current labels
      */
-    readonly labels?: EOEditorLabelLanguage;
+    get labels(): EOEditorLabelLanguage | undefined;
 
     /**
      * Editor last clicked button
      */
-    readonly lastClickedButton?: IEOEditorClickedButton;
+    get lastClickedButton(): IEOEditorClickedButton | undefined;
 
     /**
      * Image editor
      */
-    readonly imageEditor: EOImageEditor;
+    get imageEditor(): EOImageEditor;
 
     /**
      * Popup component
      */
-    readonly popup: EOPopup;
+    get popup(): EOPopup;
 
     /**
      * Name for the hidden form input
@@ -96,6 +96,11 @@ export interface IEOEditor {
     commands?: string | null;
 
     /**
+     * Editor's content
+     */
+    content?: string | null;
+
+    /**
      * Main color
      */
     color?: string | null;
@@ -108,12 +113,12 @@ export interface IEOEditor {
     /**
      * Width of the editor
      */
-    width?: string | null;
+    width?: string | number | null;
 
     /**
      * Height of the editor
      */
-    height?: string | null;
+    height?: string | number | null;
 
     /**
      * Style with CSS or tag
@@ -151,12 +156,6 @@ export interface IEOEditor {
      * @param callback Callback when doen
      */
     editImage(image: HTMLImageElement, callback?: () => void): void;
-
-    /**
-     * Get current content
-     * @returns Content
-     */
-    getContent(): string;
 
     /**
      * Get deepest node
@@ -272,12 +271,6 @@ export interface IEOEditor {
      * Restore focus to the editor iframe
      */
     restoreFocus(): void;
-
-    /**
-     * Set content
-     * @param content New contebt
-     */
-    setContent(content: string): void;
 
     /**
      * Let first range surround node

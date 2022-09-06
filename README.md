@@ -57,6 +57,7 @@ if (editor) {
 |cloneStyles|Clone styles to editor|
 |color|Main color|
 |commands|Commands, a supported collection or commands array like ['redo', 'undo']|
+|content|Get or set editor's content|
 |editorContainer|Editor container|
 |editorFrame|Editor hosted iframe|
 |editorSourceArea|Editor source code textarea|
@@ -81,7 +82,6 @@ if (editor) {
 |delete|Delete selection|
 |editImage|Edit image|
 |executeCommand|Execute command|
-|getContent|Get current content|
 |getDeepestNode|Get deepest node|
 |getFirstElement|Get first selection element|
 |getFirstElement|Get first range element|

@@ -65,8 +65,8 @@ export class EOPopup extends HTMLElement {
             }
         }
 
-        this.style.left = `${left}px`;
-        this.style.top = `${rect.bottom + 2}px`;
+        this.style.left = `${window.scrollX + left}px`;
+        this.style.top = `${window.scrollY + rect.bottom + 2}px`;
     }
 
     private clickHandler(event: MouseEvent) {

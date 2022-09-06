@@ -1,6 +1,6 @@
 {
     "name": "@etsoo/editor",
-    "version": "1.0.16",
+    "version": "1.0.17",
     "description": "ETSOO Free WYSIWYG HTML Editor",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -57,6 +57,8 @@
     "dependencies": {
         "@etsoo/shared": "^1.1.52",
         "@types/fabric": "^4.5.12",
-        "fabric": "^5.2.4"
+        "@types/pica": "^9.0.1",
+        "fabric": "^5.2.4",
+        "pica": "^9.0.1"
     }
 }

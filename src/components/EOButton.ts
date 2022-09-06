@@ -118,8 +118,8 @@ export class EOButton extends HTMLButtonElement {
             }
         }
 
-        tooltipDiv.style.left = `${left}px`;
-        tooltipDiv.style.top = `${rect.bottom + 4}px`;
+        tooltipDiv.style.left = `${window.scrollX + left}px`;
+        tooltipDiv.style.top = `${window.scrollY + rect.bottom + 4}px`;
     }
 }
 
