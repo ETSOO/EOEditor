@@ -201,7 +201,7 @@ export class EOImageEditor extends HTMLElement {
                     opacity: 1;
                     transform: scale(1.1);
                     transition: visibility 0s linear .25s,opacity .25s 0s,transform .25s;
-                    z-index: 1000;
+                    z-index: 9000;
                 }
                 .modal {
                     position: fixed;
@@ -209,14 +209,14 @@ export class EOImageEditor extends HTMLElement {
                     top: 0;
                     right: 0;
                     bottom: 0;
-                    z-index: 1010;
+                    z-index: 9010;
                 }
                 .close-button {
                     position: fixed;
                     top: 8px;
                     right: var(--close-button-right);
                     cursor: pointer;
-                    z-index: 1020;
+                    z-index: 9020;
                 }
                 .container {
                     width: 100%;
@@ -231,7 +231,6 @@ export class EOImageEditor extends HTMLElement {
                     border: 1px dotted #fff;
                 }
                 .toolbar {
-                    position: sticky;
                     border-top: 2px outset;
                     box-sizing: border-box;
                     bottom: 0px;
@@ -243,7 +242,7 @@ export class EOImageEditor extends HTMLElement {
                     align-items: center;
                 }
                 .settings {
-                    position: absolute;
+                    position: fixed;
                     box-sizing: border-box;
                     visibility: hidden;
                     left: 0px;
@@ -252,7 +251,6 @@ export class EOImageEditor extends HTMLElement {
                     padding: 8px;
                     background-color: #fff;
                     opacity: 0.9;
-                    z-index: 1020;
                     font-size: 11px;
                 }
                 .form {

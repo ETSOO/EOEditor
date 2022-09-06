@@ -2304,6 +2304,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             </div>`;
 
         this.popupContent(html);
+        this.popup.autoClose = false;
 
         this.setColorInput('color');
         this.setColorInput('backgroundColor');
@@ -2561,9 +2562,19 @@ export class EOEditor extends HTMLElement implements IEOEditor {
      * Popup HTML content
      * @param content HTML content
      * @param ready Ready callback
+     * @param insideIFrame Inside iframe or not
      */
-    popupContent(content: string, ready?: () => void) {
-        this.popup.show(content, this._lastClickedButton?.rect, ready);
+    popupContent(
+        content: string,
+        ready?: () => void,
+        insideIFrame: boolean = false
+    ) {
+        this.popup.show(
+            content,
+            this._lastClickedButton?.rect,
+            ready,
+            insideIFrame
+        );
     }
 
     /**
@@ -2608,7 +2619,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             })
             .join('');
 
-        this.popupContent(`<div class="icons">${html}</div>`, ready);
+        this.popupContent(`<div class="icons">${html}</div>`, ready, true);
 
         this.popup.querySelectorAll('button').forEach((b) => {
             const command = icons.find((icon) => icon.name === b.name);
@@ -3020,6 +3031,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             }</button></div>
         </div>`;
         this.popupContent(html);
+        this.popup.autoClose = false;
 
         let index = -1;
         let imagesCount = 0;

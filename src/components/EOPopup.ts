@@ -5,6 +5,11 @@ export class EOPopup extends HTMLElement {
     // Layout update timeout seed
     private updateSeed: number = 0;
 
+    /**
+     * Auto close when click outside
+     */
+    autoClose: boolean = true;
+
     constructor() {
         super();
 
@@ -29,7 +34,7 @@ export class EOPopup extends HTMLElement {
         document.addEventListener('mousedown', this.clickHandler.bind(this));
     }
 
-    private updatePos(location?: DOMRect) {
+    private updatePos(location?: DOMRect, insideIFrame: boolean = false) {
         const { clientWidth: maxWidth, clientHeight: maxHeight } =
             window.document.body;
 
@@ -65,14 +70,17 @@ export class EOPopup extends HTMLElement {
             }
         }
 
-        this.style.left = `${window.scrollX + left}px`;
-        this.style.top = `${window.scrollY + rect.bottom + 2}px`;
+        this.style.left = `${(insideIFrame ? 0 : window.scrollX) + left}px`;
+        this.style.top = `${
+            (insideIFrame ? 0 : window.scrollY) + rect.bottom + 2
+        }px`;
     }
 
     private clickHandler(event: MouseEvent) {
         // https://stackoverflow.com/questions/57963312/get-event-target-inside-a-web-component
         const cp = event.composedPath();
         if (
+            !this.autoClose ||
             this.style.visibility === 'hidden' ||
             cp.includes(this) ||
             (this.nodeName !== 'EO-PALETTE' &&
@@ -132,13 +140,20 @@ export class EOPopup extends HTMLElement {
      * @param message Message
      * @param location Location deciding rect
      * @param ready Ready callback
+     * @param insideIFrame Inside iframe or not
      */
-    show(message: string, location?: DOMRect, ready?: () => void) {
+    show(
+        message: string,
+        location?: DOMRect,
+        ready?: () => void,
+        insideIFrame: boolean = false
+    ) {
+        this.autoClose = true;
         this.clearUpdateSeed();
         this.innerHTML = message;
 
         this.updateSeed = window.setTimeout(() => {
-            this.updatePos(location);
+            this.updatePos(location, insideIFrame);
             this.reshow();
             if (ready) ready();
         }, 20);
