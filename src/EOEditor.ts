@@ -312,7 +312,15 @@ export class EOEditor extends HTMLElement implements IEOEditor {
      * Observed attributes
      */
     static get observedAttributes() {
-        return ['name', 'commands', 'width', 'height', 'color', 'activeColor'];
+        return [
+            'name',
+            'commands',
+            'width',
+            'height',
+            'color',
+            'activeColor',
+            'content'
+        ];
     }
 
     /**
@@ -464,19 +472,18 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         else this.removeAttribute('commands');
     }
 
-    private _content?: string | null;
-
     /**
      * Get or set editor's content
      */
     get content() {
-        if (this.hidden) return this._content;
+        if (this.hidden) return this.getAttribute('content');
         return this.editorWindow.document.body.innerHTML;
     }
-    set content(content: string | null | undefined) {
-        this._content = content;
-        if (!this.hidden)
-            this.editorWindow.document.body.innerHTML = content ?? '';
+    set content(value: string | null | undefined) {
+        if (this.hidden) {
+            if (value) this.setAttribute('content', value);
+            else this.removeAttribute('content');
+        } else this.editorWindow.document.body.innerHTML = value ?? '';
     }
 
     /**
@@ -577,6 +584,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         )!;
     }
 
+    private getBackupName() {
+        return `${EOEditor.BackupKey}-${this.name}`;
+    }
+
     /**
      * Backup editor content
      * @param miliseconds Miliseconds to wait
@@ -584,9 +595,25 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     backup(miliseconds: number = 10000) {
         this.clearBackupSeed();
         this.backupSeed = window.setTimeout(() => {
-            if (this.content)
-                window.localStorage.setItem(EOEditor.BackupKey, this.content);
+            if (this.content) {
+                window.localStorage.setItem(this.getBackupName(), this.content);
+                this.dispatchEvent(new Event('backup'));
+            }
         }, miliseconds);
+    }
+
+    /**
+     * Clear backup
+     */
+    clearBackup() {
+        window.localStorage.removeItem(this.getBackupName());
+    }
+
+    /**
+     * Get backup
+     */
+    getBackup() {
+        return window.localStorage.getItem(this.getBackupName());
     }
 
     private setCommands() {
@@ -829,18 +856,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             );
         }
 
-        // Once
-        const win = this.editorFrame.contentWindow;
-        if (win == null) {
-            this.editorFrame.addEventListener(
-                'load',
-                () => this.initContent(this.editorFrame.contentWindow!),
-                {
-                    once: true
-                }
-            );
-        } else {
-            this.initContent(win);
+        // Check document readyState
+        const init = () => {
+            if (document.readyState !== 'complete') return false;
+            this.initContent(this.editorFrame.contentWindow);
+            return true;
+        };
+        if (!init()) {
+            document.addEventListener('readystatechange', () => init());
         }
     }
 
@@ -849,12 +872,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.palette.hide();
     }
 
-    private initContent(win: Window) {
+    private initContent(win: Window | null) {
+        if (win == null) return;
+
         this._editorWindow = win;
         const doc = win.document;
 
         doc.open();
-        doc.write(this._content ?? this.innerHTML);
+        doc.write((this.getBackup() || this.content) ?? this.innerHTML);
         doc.close();
 
         if (doc.body.contentEditable !== 'true') {

@@ -137,6 +137,11 @@ export interface IEOEditor {
     backup(miliseconds?: number): void;
 
     /**
+     * Clear backup
+     */
+    clearBackup(): void;
+
+    /**
      * Create element
      * @param tagName Tag name
      * @returns Element
@@ -156,6 +161,11 @@ export interface IEOEditor {
      * @param callback Callback when doen
      */
     editImage(image: HTMLImageElement, callback?: () => void): void;
+
+    /**
+     * Get backup
+     */
+    getBackup(): string | null;
 
     /**
      * Get deepest node
