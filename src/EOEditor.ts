@@ -603,7 +603,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
      * Backup editor content
      * @param miliseconds Miliseconds to wait
      */
-    backup(miliseconds: number = 10000) {
+    backup(miliseconds: number = 1000) {
         this.clearBackupSeed();
         this.backupSeed = window.setTimeout(() => {
             if (this.content) {
@@ -2958,7 +2958,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.toggleButtons(isSource);
 
         // Backup
-        this.backup(1000);
+        this.backup();
     }
 
     /**
