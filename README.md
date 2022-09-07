@@ -86,6 +86,7 @@ export const EOEditorEx = React.forwardRef<IEOEditor, EOEditorExProps>(
 |Name|Description|
 |---:|---|
 |activeColor|Active color|
+|backupKey|Backup distinguish key|
 |buttons|All first-level buttons|
 |cloneStyles|Clone styles to editor|
 |color|Main color|

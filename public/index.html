@@ -33,6 +33,7 @@
                 name="description"
                 language="zh-CN"
                 activeColor="#ff0000"
+                backupKey="test"
             >
                 <p>Editor content: <b>Hello, world!</b></p>
                 <h2>H2 Text</h2>
@@ -69,12 +70,18 @@
                     <img src="sample.jfif" />
                 </p>
             </eo-editor>
-            <button
-                type="submit"
-                style="margin: 1em 0em; width: 100%; height: 30px"
-            >
-                Submit
-            </button>
+            <div style="display: flex; gap: 1em; margin: 1em 0em">
+                <button
+                    type="button"
+                    onclick="editor.value = '<p>Hello, ETSOO</p>'"
+                    style="width: 100%; height: 36px"
+                >
+                    Set Content
+                </button>
+                <button type="submit" style="width: 100%; height: 36px">
+                    Submit
+                </button>
+            </div>
         </form>
         <script>
             const editor = document.querySelector('eo-editor');

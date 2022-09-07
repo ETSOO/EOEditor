@@ -312,16 +312,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
      * Observed attributes
      */
     static get observedAttributes() {
-        return [
-            'name',
-            'commands',
-            'width',
-            'height',
-            'color',
-            'activeColor',
-            'content',
-            'value'
-        ];
+        return ['name', 'commands', 'width', 'height', 'color', 'activeColor'];
     }
 
     /**
@@ -572,6 +563,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     /**
+     * Backup key
+     */
+    get backupKey() {
+        return this.getAttribute('backupKey');
+    }
+    set backupKey(value: string | null | undefined) {
+        if (value) this.setAttribute('backupKey', value);
+        else this.removeAttribute('backupKey');
+    }
+
+    /**
      * Constructor
      */
     constructor() {
@@ -596,7 +598,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     private getBackupName() {
-        return `${EOEditor.BackupKey}-${this.name}`;
+        return `${EOEditor.BackupKey}-${this.name}-${this.backupKey}`;
     }
 
     /**
