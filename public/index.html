@@ -28,44 +28,59 @@
     </head>
     <body>
         <h1>EOEditor 2022</h1>
-        <eo-editor
-            name="description"
-            language="zh-CN"
-            activeColor="#ff0000"
-            onchange="alert('ok')"
-        >
-            <p>Editor content: <b>Hello, world!</b></p>
-            <h2>H2 Text</h2>
-            <p>亿速思维网站：<a href="https://www.etsoo.com">etsoo.com</a></p>
-            <table width="100%">
-                <thead>
-                    <tr>
-                        <th>TH1</th>
-                        <th colspan="2">TH2</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="2">Row1</td>
-                        <td rowspan="3">TD 1/2</td>
-                    </tr>
-                    <tr>
-                        <td rowspan="2">Row2</td>
-                        <td>TD 2/2</td>
-                    </tr>
-                    <tr>
-                        <td>Row3</td>
-                    </tr>
-                    <tr>
-                        <td>Row4</td>
-                        <td>TD 4/2</td>
-                        <td>TD 4/3</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>
-                <img src="sample.jfif" />
-            </p>
-        </eo-editor>
+        <form onsubmit="console.log('Form submit'); event.preventDefault();">
+            <eo-editor
+                name="description"
+                language="zh-CN"
+                activeColor="#ff0000"
+            >
+                <p>Editor content: <b>Hello, world!</b></p>
+                <h2>H2 Text</h2>
+                <p>
+                    亿速思维网站：<a href="https://www.etsoo.com">etsoo.com</a>
+                </p>
+                <table width="100%">
+                    <thead>
+                        <tr>
+                            <th>TH1</th>
+                            <th colspan="2">TH2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">Row1</td>
+                            <td rowspan="3">TD 1/2</td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2">Row2</td>
+                            <td>TD 2/2</td>
+                        </tr>
+                        <tr>
+                            <td>Row3</td>
+                        </tr>
+                        <tr>
+                            <td>Row4</td>
+                            <td>TD 4/2</td>
+                            <td>TD 4/3</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>
+                    <img src="sample.jfif" />
+                </p>
+            </eo-editor>
+            <button
+                type="submit"
+                style="margin: 1em 0em; width: 100%; height: 30px"
+            >
+                Submit
+            </button>
+        </form>
+        <script>
+            const editor = document.querySelector('eo-editor');
+            editor.addEventListener('backup', (event) => {
+                console.log('backup', event.detail);
+            });
+        </script>
     </body>
 </html>

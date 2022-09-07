@@ -605,15 +605,22 @@ export class EOEditor extends HTMLElement implements IEOEditor {
      */
     backup(miliseconds: number = 1000) {
         this.clearBackupSeed();
-        this.backupSeed = window.setTimeout(() => {
-            const content = this.content;
-            if (content) {
-                window.localStorage.setItem(this.getBackupName(), content);
-                this.dispatchEvent(
-                    new CustomEvent('backup', { detail: content })
-                );
-            }
-        }, miliseconds);
+        if (miliseconds < 0) {
+            this.backupAction();
+        } else {
+            this.backupSeed = window.setTimeout(
+                () => this.backupAction(),
+                miliseconds
+            );
+        }
+    }
+
+    private backupAction() {
+        const content = this.content;
+        if (content) {
+            window.localStorage.setItem(this.getBackupName(), content);
+            this.dispatchEvent(new CustomEvent('backup', { detail: content }));
+        }
     }
 
     /**
@@ -1579,7 +1586,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     private onFormSubmit() {
         this.clearHighlights();
         if (this.formInput) this.formInput.value = this.innerHTML;
-        this.backup(0);
+
+        // this.backup(0) will submit first then trigger backup event
+        this.backup(-1);
     }
 
     private clearBackupSeed() {
