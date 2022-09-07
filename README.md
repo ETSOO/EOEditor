@@ -48,7 +48,7 @@ if (editor) {
 ```
 
 Using ReactJs:
-React component wrapper EOEditorEx, or install '@etsoo/reacteoeditor'
+React component wrapper EOEditorEx, or install '@etsoo/reacteditor'
 ```javascript
 import { EOEditor, IEOEditor } from '@etsoo/editor';
 import React from 'react';
