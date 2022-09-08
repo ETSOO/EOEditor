@@ -563,7 +563,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     /**
-     * Backup key
+     * Backup distinguish key
      */
     get backupKey() {
         return this.getAttribute('backupKey');

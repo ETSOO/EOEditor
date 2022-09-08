@@ -111,6 +111,11 @@ export interface IEOEditor {
     activeColor?: string | null;
 
     /**
+     * Backup distinguish key
+     */
+    backupKey?: string | null;
+
+    /**
      * Editor's value, alias of content
      */
     value?: string | null;
