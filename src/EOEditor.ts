@@ -306,13 +306,24 @@ const hhClass = 'eo-highlight';
 
 /**
  * EOEditor
+ * Attributes (strings that are set declaratively on the tag itself or set imperatively using setAttribute) vs Properties
+ * https://lamplightdev.com/blog/2020/04/30/whats-the-difference-between-web-component-attributes-and-properties/
  */
 export class EOEditor extends HTMLElement implements IEOEditor {
     /**
      * Observed attributes
      */
     static get observedAttributes() {
-        return ['name', 'commands', 'width', 'height', 'color', 'activeColor'];
+        return [
+            'name',
+            'commands',
+            'width',
+            'height',
+            'color',
+            'activeColor',
+            'content',
+            'value'
+        ];
     }
 
     /**
@@ -475,7 +486,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         if (this.hidden) {
             if (value) this.setAttribute('content', value);
             else this.removeAttribute('content');
-        } else this.editorWindow.document.body.innerHTML = value ?? '';
+        } else this.setContent(value);
     }
 
     /**
@@ -821,6 +832,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     private setColor() {
         const color = this.color;
         if (color) this.style.setProperty('--color', color, 'important');
+    }
+
+    private setContent(value?: string | null) {
+        this.editorWindow.document.body.innerHTML = value ?? '';
     }
 
     private setActiveColor() {
@@ -1406,6 +1421,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 break;
             case 'activeColor':
                 this.setActiveColor();
+                break;
+            case 'content':
+            case 'value':
+                this.setContent(newVal);
                 break;
         }
     }
