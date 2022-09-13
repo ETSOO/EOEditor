@@ -1302,6 +1302,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 this.onSelectionChange()
             );
 
+            // Backup content when window blurs
+            win.addEventListener('blur', () => {
+                this.backup(-1);
+            });
+
             // Display
             this.hidden = false;
         }
