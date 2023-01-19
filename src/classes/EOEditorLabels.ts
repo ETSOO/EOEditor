@@ -61,10 +61,10 @@ export type EOEditorLabelLanguage = {
     yes: string;
 };
 
-const zhCN: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
-    name: 'zh-CN',
+const zhHans: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
+    name: 'zh-Hans',
     label: '简体中文',
-    compatibleName: ['zh-SG'],
+    compatibleNames: ['zh-CN', 'zh-SG'],
     resources: {
         about: '关于EOEditor',
         aboutContent:
@@ -176,10 +176,10 @@ const zhCN: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
     }
 };
 
-const zhHK: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
-    name: 'zh-hk',
+const zhHant: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
+    name: 'zh-Hant',
     label: '繁體中文',
-    compatibleName: ['zh-TW', 'zh-MO'],
+    compatibleNames: ['zh-HK', 'zh-TW', 'zh-MO'],
     resources: {
         about: '關於EOEditor',
         aboutContent:
@@ -291,8 +291,8 @@ const zhHK: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
     }
 };
 
-const enUS: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
-    name: 'en-US',
+const en: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
+    name: 'en',
     label: 'English',
     resources: {
         about: 'About EOEditor',
@@ -412,8 +412,5 @@ const enUS: DataTypes.CultureDefinition<EOEditorLabelLanguage> = {
  * @returns Language labels
  */
 export function EOEditorGetLabels(language: string) {
-    return (
-        DomUtils.getCulture([zhCN, zhHK, enUS], language)?.resources ??
-        enUS.resources
-    );
+    return DomUtils.getCulture([en, zhHans, zhHant], language)[0]!.resources;
 }

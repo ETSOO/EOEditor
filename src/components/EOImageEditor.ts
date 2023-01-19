@@ -88,7 +88,7 @@ export class EOImageEditor extends HTMLElement {
     /**
      * Current active object
      */
-    private activeObject?: fabric.Object;
+    private activeObject: fabric.Object | null | undefined;
 
     /**
      * Complete callback

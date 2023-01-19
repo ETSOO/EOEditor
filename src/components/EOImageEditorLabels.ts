@@ -1,4 +1,4 @@
-import { DataTypes, DomUtils, Utils } from '@etsoo/shared';
+import { DataTypes, DomUtils } from '@etsoo/shared';
 
 /**
  * EOEditor Image Editor language labels
@@ -58,10 +58,10 @@ export type EOImageEditorLabelLanguage = {
     zoomOut: string;
 };
 
-const zhCN: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
-    name: 'zh-CN',
+const zhHans: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
+    name: 'zh-Hans',
     label: '简体中文',
-    compatibleName: ['zh-SG'],
+    compatibleNames: ['zh-CN', 'zh-SG'],
     resources: {
         bgColor: '背景颜色',
         blur: '模糊',
@@ -118,10 +118,10 @@ const zhCN: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
     }
 };
 
-const zhHK: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
-    name: 'zh-HK',
+const zhHant: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
+    name: 'zh-Hant',
     label: '繁體中文',
-    compatibleName: ['zh-TW', 'zh-MO'],
+    compatibleNames: ['zh-HK', 'zh-TW', 'zh-MO'],
     resources: {
         bgColor: '背景顏色',
         blur: '模糊',
@@ -178,8 +178,8 @@ const zhHK: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
     }
 };
 
-const enUS: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
-    name: 'en-US',
+const en: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
+    name: 'en',
     label: 'English',
     resources: {
         bgColor: 'Background color',
@@ -243,8 +243,5 @@ const enUS: DataTypes.CultureDefinition<EOImageEditorLabelLanguage> = {
  * @returns Language labels
  */
 export function EOImageEditorGetLabels(language: string) {
-    return (
-        DomUtils.getCulture([zhCN, zhHK, enUS], language)?.resources ??
-        enUS.resources
-    );
+    return DomUtils.getCulture([en, zhHans, zhHant], language)[0]!.resources;
 }
