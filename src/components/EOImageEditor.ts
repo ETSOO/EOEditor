@@ -1,5 +1,4 @@
 import { DomUtils, Keyboard, NumberUtils, Utils } from '@etsoo/shared';
-import { fabric } from 'fabric';
 import {
     EOEditorHistory,
     EOEditorHistoryState
@@ -11,25 +10,10 @@ import {
 } from './EOImageEditorLabels';
 import { EOPalette } from './EOPalette';
 import { EOPopup } from './EOPopup';
+import type { fabric as _f } from 'fabric';
 
-// https://github.com/fabricjs/fabric.js/issues/3319
-// Change the padding logic to include background-color
-(fabric.Text as any).prototype.set({
-    _getNonTransformedDimensions() {
-        // Object dimensions
-        return new fabric.Point(this.width, this.height).scalarAdd(
-            this.padding
-        );
-    },
-    _calculateCurrentDimensions() {
-        // Controls dimensions
-        return fabric.util.transformPoint(
-            this._getTransformedDimensions(),
-            this.getViewportTransform(),
-            true
-        );
-    }
-});
+type f = typeof _f;
+let fabric: f;
 
 /**
  * EOEditor Image Editor commands
@@ -516,7 +500,29 @@ export class EOImageEditor extends HTMLElement {
         event.stopPropagation();
     }
 
-    connectedCallback() {
+    async connectedCallback() {
+        const { fabric: f } = await import('fabric');
+        fabric = f;
+
+        // https://github.com/fabricjs/fabric.js/issues/3319
+        // Change the padding logic to include background-color
+        (fabric.Text as any).prototype.set({
+            _getNonTransformedDimensions() {
+                // Object dimensions
+                return new fabric.Point(this.width, this.height).scalarAdd(
+                    this.padding
+                );
+            },
+            _calculateCurrentDimensions() {
+                // Controls dimensions
+                return fabric.util.transformPoint(
+                    this._getTransformedDimensions(),
+                    this.getViewportTransform(),
+                    true
+                );
+            }
+        });
+
         this.hidden = true;
         this.createCommands();
 

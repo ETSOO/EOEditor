@@ -8,7 +8,7 @@
 ## Support / 支持 ##
 - Browsers since 2019 (ES2019+), no Internet Exployer support.
 - Custom HTML element/component feature. Easilly integrate with other frameworks like Angular/React/Vue.
-- One file (≈500K) is all, no other dependencies.
+- Splitted fabric into separate file to reduce load size.
 - English and Chinese(简体/繁体).
 
 ## / Picture editing / 图片编辑 ##
