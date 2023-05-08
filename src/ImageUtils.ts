@@ -1,5 +1,3 @@
-import pica from 'pica';
-
 /**
  * Size
  */
@@ -62,6 +60,9 @@ export namespace ImageUtils {
         size: Size,
         quality?: 0 | 1 | 2 | 3
     ) {
+        // Dynamic load pica
+        const pica = (await import('pica')).default;
+
         // Canvas
         const to = document.createElement('canvas');
         to.width = size.width;

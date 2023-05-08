@@ -588,182 +588,186 @@ export class EOImageEditor extends HTMLElement {
 
     private createCommands() {
         const language = this.language ?? window.navigator.language;
-        const l = EOImageEditorGetLabels(language);
-        this._labels = l;
 
-        this.palette.applyLabel = l.ok;
+        EOImageEditorGetLabels(language).then((l) => {
+            this._labels = l;
 
-        const commands: EOImageEditorCommand[] = [
-            {
-                name: 'undo',
-                icon: '<path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z" />',
-                label: l.undo
-            },
-            {
-                name: 'redo',
-                icon: '<path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" />',
-                label: l.redo
-            },
-            EOImageEditorSeparator,
-            {
-                name: 'zoomIn',
-                icon: '<path d="M15.5,14L20.5,19L19,20.5L14,15.5V14.71L13.73,14.43C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.43,13.73L14.71,14H15.5M9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14M12,10H10V12H9V10H7V9H9V7H10V9H12V10Z" />',
-                label: l.zoomIn
-            },
-            {
-                name: 'zoomOut',
-                icon: '<path d="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14M7,9H12V10H7V9Z" />',
-                label: l.zoomOut
-            },
-            EOImageEditorSeparator,
-            {
-                name: 'rotateLeft',
-                icon: '<path d="M13,4.07V1L8.45,5.55L13,10V6.09C15.84,6.57 18,9.03 18,12C18,14.97 15.84,17.43 13,17.91V19.93C16.95,19.44 20,16.08 20,12C20,7.92 16.95,4.56 13,4.07M7.1,18.32C8.26,19.22 9.61,19.76 11,19.93V17.9C10.13,17.75 9.29,17.41 8.54,16.87L7.1,18.32M6.09,13H4.07C4.24,14.39 4.79,15.73 5.69,16.89L7.1,15.47C6.58,14.72 6.23,13.88 6.09,13M7.11,8.53L5.7,7.11C4.8,8.27 4.24,9.61 4.07,11H6.09C6.23,10.13 6.58,9.28 7.11,8.53Z" />',
-                label: l.rotateLeft
-            },
-            {
-                name: 'rotateRight',
-                icon: '<path d="M16.89,15.5L18.31,16.89C19.21,15.73 19.76,14.39 19.93,13H17.91C17.77,13.87 17.43,14.72 16.89,15.5M13,17.9V19.92C14.39,19.75 15.74,19.21 16.9,18.31L15.46,16.87C14.71,17.41 13.87,17.76 13,17.9M19.93,11C19.76,9.61 19.21,8.27 18.31,7.11L16.89,8.53C17.43,9.28 17.77,10.13 17.91,11M15.55,5.55L11,1V4.07C7.06,4.56 4,7.92 4,12C4,16.08 7.05,19.44 11,19.93V17.91C8.16,17.43 6,14.97 6,12C6,9.03 8.16,6.57 11,6.09V10L15.55,5.55Z" />',
-                label: l.rotateRight
-            },
-            EOImageEditorSeparator,
-            {
-                name: 'text',
-                icon: '<path d="M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z" />',
-                label: l.text
-            },
-            {
-                name: 'image',
-                icon: '<path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z" />',
-                label: l.image
-            },
-            {
-                name: 'crop',
-                icon: cropPath,
-                label: l.crop
-            },
-            {
-                name: 'filter',
-                icon: '<path d="M12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16M18.7,12.4C18.42,12.24 18.13,12.11 17.84,12C18.13,11.89 18.42,11.76 18.7,11.6C20.62,10.5 21.69,8.5 21.7,6.41C19.91,5.38 17.63,5.3 15.7,6.41C15.42,6.57 15.16,6.76 14.92,6.95C14.97,6.64 15,6.32 15,6C15,3.78 13.79,1.85 12,0.81C10.21,1.85 9,3.78 9,6C9,6.32 9.03,6.64 9.08,6.95C8.84,6.75 8.58,6.56 8.3,6.4C6.38,5.29 4.1,5.37 2.3,6.4C2.3,8.47 3.37,10.5 5.3,11.59C5.58,11.75 5.87,11.88 6.16,12C5.87,12.1 5.58,12.23 5.3,12.39C3.38,13.5 2.31,15.5 2.3,17.58C4.09,18.61 6.37,18.69 8.3,17.58C8.58,17.42 8.84,17.23 9.08,17.04C9.03,17.36 9,17.68 9,18C9,20.22 10.21,22.15 12,23.19C13.79,22.15 15,20.22 15,18C15,17.68 14.97,17.36 14.92,17.05C15.16,17.25 15.42,17.43 15.7,17.59C17.62,18.7 19.9,18.62 21.7,17.59C21.69,15.5 20.62,13.5 18.7,12.4Z" />',
-                label: l.filter
-            },
-            EOImageEditorSeparator,
-            {
-                name: 'hcenter',
-                icon: '<path d="M19,16V13H23V11H19V8L15,12L19,16M5,8V11H1V13H5V16L9,12L5,8M11,20H13V4H11V20Z" />',
-                label: l.hcenter
-            },
-            {
-                name: 'vcenter',
-                icon: '<path d="M8,19H11V23H13V19H16L12,15L8,19M16,5H13V1H11V5H8L12,9L16,5M4,11V13H20V11H4Z" />',
-                label: l.vcenter
-            },
-            {
-                name: 'bringToFront',
-                icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H10V20H20V10H18V8H22Z" />',
-                label: l.bringToFront
-            },
-            {
-                name: 'bringToBack',
-                icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H18V8H22M4,4V14H14V4H4Z" />',
-                label: l.bringToBack
-            },
-            {
-                name: 'delete',
-                icon: '<path d="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" />',
-                label: l.delete
-            },
-            EOImageEditorSeparator,
-            {
-                name: 'preview',
-                icon: '<path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />',
-                label: l.preview
-            },
-            {
-                name: 'complete',
-                icon: '<path d="M0.41,13.41L6,19L7.41,17.58L1.83,12M22.24,5.58L11.66,16.17L7.5,12L6.07,13.41L11.66,19L23.66,7M18,7L16.59,5.58L10.24,11.93L11.66,13.34L18,7Z" />',
-                label: l.complete
-            }
-        ];
+            this.palette.applyLabel = l.ok;
 
-        // For small screens
-        if (this.xs) {
-            for (let i = commands.length - 1; i >= 0; i--) {
-                if (commands[i].name === 's') {
-                    commands.splice(i, 1);
+            const commands: EOImageEditorCommand[] = [
+                {
+                    name: 'undo',
+                    icon: '<path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z" />',
+                    label: l.undo
+                },
+                {
+                    name: 'redo',
+                    icon: '<path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" />',
+                    label: l.redo
+                },
+                EOImageEditorSeparator,
+                {
+                    name: 'zoomIn',
+                    icon: '<path d="M15.5,14L20.5,19L19,20.5L14,15.5V14.71L13.73,14.43C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.43,13.73L14.71,14H15.5M9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14M12,10H10V12H9V10H7V9H9V7H10V9H12V10Z" />',
+                    label: l.zoomIn
+                },
+                {
+                    name: 'zoomOut',
+                    icon: '<path d="M15.5,14H14.71L14.43,13.73C15.41,12.59 16,11.11 16,9.5A6.5,6.5 0 0,0 9.5,3A6.5,6.5 0 0,0 3,9.5A6.5,6.5 0 0,0 9.5,16C11.11,16 12.59,15.41 13.73,14.43L14,14.71V15.5L19,20.5L20.5,19L15.5,14M9.5,14C7,14 5,12 5,9.5C5,7 7,5 9.5,5C12,5 14,7 14,9.5C14,12 12,14 9.5,14M7,9H12V10H7V9Z" />',
+                    label: l.zoomOut
+                },
+                EOImageEditorSeparator,
+                {
+                    name: 'rotateLeft',
+                    icon: '<path d="M13,4.07V1L8.45,5.55L13,10V6.09C15.84,6.57 18,9.03 18,12C18,14.97 15.84,17.43 13,17.91V19.93C16.95,19.44 20,16.08 20,12C20,7.92 16.95,4.56 13,4.07M7.1,18.32C8.26,19.22 9.61,19.76 11,19.93V17.9C10.13,17.75 9.29,17.41 8.54,16.87L7.1,18.32M6.09,13H4.07C4.24,14.39 4.79,15.73 5.69,16.89L7.1,15.47C6.58,14.72 6.23,13.88 6.09,13M7.11,8.53L5.7,7.11C4.8,8.27 4.24,9.61 4.07,11H6.09C6.23,10.13 6.58,9.28 7.11,8.53Z" />',
+                    label: l.rotateLeft
+                },
+                {
+                    name: 'rotateRight',
+                    icon: '<path d="M16.89,15.5L18.31,16.89C19.21,15.73 19.76,14.39 19.93,13H17.91C17.77,13.87 17.43,14.72 16.89,15.5M13,17.9V19.92C14.39,19.75 15.74,19.21 16.9,18.31L15.46,16.87C14.71,17.41 13.87,17.76 13,17.9M19.93,11C19.76,9.61 19.21,8.27 18.31,7.11L16.89,8.53C17.43,9.28 17.77,10.13 17.91,11M15.55,5.55L11,1V4.07C7.06,4.56 4,7.92 4,12C4,16.08 7.05,19.44 11,19.93V17.91C8.16,17.43 6,14.97 6,12C6,9.03 8.16,6.57 11,6.09V10L15.55,5.55Z" />',
+                    label: l.rotateRight
+                },
+                EOImageEditorSeparator,
+                {
+                    name: 'text',
+                    icon: '<path d="M18.5,4L19.66,8.35L18.7,8.61C18.25,7.74 17.79,6.87 17.26,6.43C16.73,6 16.11,6 15.5,6H13V16.5C13,17 13,17.5 13.33,17.75C13.67,18 14.33,18 15,18V19H9V18C9.67,18 10.33,18 10.67,17.75C11,17.5 11,17 11,16.5V6H8.5C7.89,6 7.27,6 6.74,6.43C6.21,6.87 5.75,7.74 5.3,8.61L4.34,8.35L5.5,4H18.5Z" />',
+                    label: l.text
+                },
+                {
+                    name: 'image',
+                    icon: '<path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z" />',
+                    label: l.image
+                },
+                {
+                    name: 'crop',
+                    icon: cropPath,
+                    label: l.crop
+                },
+                {
+                    name: 'filter',
+                    icon: '<path d="M12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16M18.7,12.4C18.42,12.24 18.13,12.11 17.84,12C18.13,11.89 18.42,11.76 18.7,11.6C20.62,10.5 21.69,8.5 21.7,6.41C19.91,5.38 17.63,5.3 15.7,6.41C15.42,6.57 15.16,6.76 14.92,6.95C14.97,6.64 15,6.32 15,6C15,3.78 13.79,1.85 12,0.81C10.21,1.85 9,3.78 9,6C9,6.32 9.03,6.64 9.08,6.95C8.84,6.75 8.58,6.56 8.3,6.4C6.38,5.29 4.1,5.37 2.3,6.4C2.3,8.47 3.37,10.5 5.3,11.59C5.58,11.75 5.87,11.88 6.16,12C5.87,12.1 5.58,12.23 5.3,12.39C3.38,13.5 2.31,15.5 2.3,17.58C4.09,18.61 6.37,18.69 8.3,17.58C8.58,17.42 8.84,17.23 9.08,17.04C9.03,17.36 9,17.68 9,18C9,20.22 10.21,22.15 12,23.19C13.79,22.15 15,20.22 15,18C15,17.68 14.97,17.36 14.92,17.05C15.16,17.25 15.42,17.43 15.7,17.59C17.62,18.7 19.9,18.62 21.7,17.59C21.69,15.5 20.62,13.5 18.7,12.4Z" />',
+                    label: l.filter
+                },
+                EOImageEditorSeparator,
+                {
+                    name: 'hcenter',
+                    icon: '<path d="M19,16V13H23V11H19V8L15,12L19,16M5,8V11H1V13H5V16L9,12L5,8M11,20H13V4H11V20Z" />',
+                    label: l.hcenter
+                },
+                {
+                    name: 'vcenter',
+                    icon: '<path d="M8,19H11V23H13V19H16L12,15L8,19M16,5H13V1H11V5H8L12,9L16,5M4,11V13H20V11H4Z" />',
+                    label: l.vcenter
+                },
+                {
+                    name: 'bringToFront',
+                    icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H10V20H20V10H18V8H22Z" />',
+                    label: l.bringToFront
+                },
+                {
+                    name: 'bringToBack',
+                    icon: '<path d="M2,2H16V16H2V2M22,8V22H8V18H18V8H22M4,4V14H14V4H4Z" />',
+                    label: l.bringToBack
+                },
+                {
+                    name: 'delete',
+                    icon: '<path d="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" />',
+                    label: l.delete
+                },
+                EOImageEditorSeparator,
+                {
+                    name: 'preview',
+                    icon: '<path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />',
+                    label: l.preview
+                },
+                {
+                    name: 'complete',
+                    icon: '<path d="M0.41,13.41L6,19L7.41,17.58L1.83,12M22.24,5.58L11.66,16.17L7.5,12L6.07,13.41L11.66,19L23.66,7M18,7L16.59,5.58L10.24,11.93L11.66,13.34L18,7Z" />',
+                    label: l.complete
+                }
+            ];
+
+            // For small screens
+            if (this.xs) {
+                for (let i = commands.length - 1; i >= 0; i--) {
+                    if (commands[i].name === 's') {
+                        commands.splice(i, 1);
+                    }
                 }
             }
-        }
 
-        const html =
-            commands
-                .map((c) =>
-                    c.name === 's'
-                        ? '<div class="separator"></div>'
-                        : `<button name="${c.name}" title="${c.label}">${
-                              c.name === 'image'
-                                  ? '<input id="imageFile" type="file" multiple accept="image/*" style="position: absolute; left: -2px; top: -2px; width: 40px; height: 32px; opacity: 0">'
-                                  : ''
-                          }${this.createSVG(c.icon)}</button>`
-                )
-                .join('') +
-            `<label><input type="checkbox" name="pngFormat">PNG</label>`;
+            const html =
+                commands
+                    .map((c) =>
+                        c.name === 's'
+                            ? '<div class="separator"></div>'
+                            : `<button name="${c.name}" title="${c.label}">${
+                                  c.name === 'image'
+                                      ? '<input id="imageFile" type="file" multiple accept="image/*" style="position: absolute; left: -2px; top: -2px; width: 40px; height: 32px; opacity: 0">'
+                                      : ''
+                              }${this.createSVG(c.icon)}</button>`
+                    )
+                    .join('') +
+                `<label><input type="checkbox" name="pngFormat">PNG</label>`;
 
-        this.icons.innerHTML = html;
+            this.icons.innerHTML = html;
 
-        this.pngFormat = this.toolbar.querySelector<HTMLInputElement>(
-            'input[name="pngFormat"]'
-        )!;
+            this.pngFormat = this.toolbar.querySelector<HTMLInputElement>(
+                'input[name="pngFormat"]'
+            )!;
 
-        this.icons.querySelectorAll('button').forEach((b) => {
-            b.addEventListener('click', () => {
-                this.doAction(b.name, b);
-            });
-
-            if (b.name === 'redo') this.redo = b;
-            else if (b.name === 'undo') this.undo = b;
-        });
-
-        const loadFile = (file: File) => {
-            if (!file.type.startsWith('image/')) return;
-            DomUtils.fileToDataURL(file).then((data) => {
-                fabric.Image.fromURL(data, (image) => {
-                    const imageState: EOEditorHistoryState = {
-                        title: l.image,
-                        action: () => {
-                            image.lockUniScaling = true;
-                            image.setControlsVisibility({
-                                mt: false, // middle top disable
-                                mb: false, // midle bottom
-                                ml: false, // middle left
-                                mr: false // middle right
-                            });
-                            this.fc?.add(image);
-                        },
-                        undo: () => this.fc?.remove(image)
-                    };
-                    imageState.action();
-                    this.fc?.setActiveObject(image);
-                    this.history?.pushState(imageState);
+            this.icons.querySelectorAll('button').forEach((b) => {
+                b.addEventListener('click', () => {
+                    this.doAction(b.name, b);
                 });
-            });
-        };
 
-        const fileInput =
-            this.icons.querySelector<HTMLInputElement>('input[type="file"]');
-        if (fileInput) {
-            fileInput.addEventListener('click', () => {
-                fileInput.value = '';
+                if (b.name === 'redo') this.redo = b;
+                else if (b.name === 'undo') this.undo = b;
             });
-            fileInput.addEventListener('change', () => {
-                const files = fileInput.files;
-                if (files == null || files.length === 0) return;
 
-                for (let file of files) {
-                    loadFile(file);
-                }
-            });
-        }
+            const loadFile = (file: File) => {
+                if (!file.type.startsWith('image/')) return;
+                DomUtils.fileToDataURL(file).then((data) => {
+                    fabric.Image.fromURL(data, (image) => {
+                        const imageState: EOEditorHistoryState = {
+                            title: l.image,
+                            action: () => {
+                                image.lockUniScaling = true;
+                                image.setControlsVisibility({
+                                    mt: false, // middle top disable
+                                    mb: false, // midle bottom
+                                    ml: false, // middle left
+                                    mr: false // middle right
+                                });
+                                this.fc?.add(image);
+                            },
+                            undo: () => this.fc?.remove(image)
+                        };
+                        imageState.action();
+                        this.fc?.setActiveObject(image);
+                        this.history?.pushState(imageState);
+                    });
+                });
+            };
+
+            const fileInput =
+                this.icons.querySelector<HTMLInputElement>(
+                    'input[type="file"]'
+                );
+            if (fileInput) {
+                fileInput.addEventListener('click', () => {
+                    fileInput.value = '';
+                });
+                fileInput.addEventListener('change', () => {
+                    const files = fileInput.files;
+                    if (files == null || files.length === 0) return;
+
+                    for (let file of files) {
+                        loadFile(file);
+                    }
+                });
+            }
+        });
     }
 
     private createSVG(path: string, size: number = 24) {

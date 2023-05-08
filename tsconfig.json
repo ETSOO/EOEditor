@@ -5,6 +5,7 @@
         "module": "ESNext",
         "moduleResolution": "node",
         "isolatedModules": true,
+        "resolveJsonModule": true,
         "outDir": "./lib",
         "sourceMap": true,
         "declaration": true,

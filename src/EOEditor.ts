@@ -340,7 +340,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         'subscript',
         'superscript',
         'link',
-        'unlink'
+        'unlink',
+        'lock'
     ];
 
     /**
@@ -654,40 +655,46 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         const commands = EOEditorCommandsParse(this.commands);
 
         const language = this.language ?? window.navigator.language;
-        const labels = EOEditorGetLabels(language);
-        this._labels = labels;
 
-        this.imageEditor.language = language;
-        this.palette.applyLabel = labels.apply;
+        EOEditorGetLabels(language).then((labels) => {
+            this._labels = labels;
 
-        const buttons = commands
-            .map((c) => {
-                const more = c.subs && c.subs.length > 0;
-                if (!more) return this.createButton(c.name, c.command);
+            this.imageEditor.language = language;
+            this.palette.applyLabel = labels.apply;
 
-                const label = c.command.label ?? labels[c.name];
-                const icon = c.command.icon;
-                return `<button is="eo-button" class="${
-                    icon === '' ? 'more text' : c.name === 'more' ? '' : 'more'
-                }" name="${
-                    c.name
-                }" tooltip="${label}" data-subs="${c.subs?.join(',')}">${
-                    icon === ''
-                        ? `<span class="text">${label}</span>`
-                        : this.createSVG(c.command.icon)
-                }${
-                    c.name === 'more'
-                        ? ''
-                        : '<svg width="16" height="16" viewBox="0 0 24 24" class="more-icon"><path d="M7,10L12,15L17,10H7Z" /></svg>'
-                }</button>`;
-            })
-            .join('');
+            const buttons = commands
+                .map((c) => {
+                    const more = c.subs && c.subs.length > 0;
+                    if (!more) return this.createButton(c.name, c.command);
 
-        this.editorToolbar.innerHTML = buttons;
+                    const label = c.command.label ?? labels[c.name];
+                    const icon = c.command.icon;
+                    return `<button is="eo-button" class="${
+                        icon === ''
+                            ? 'more text'
+                            : c.name === 'more'
+                            ? ''
+                            : 'more'
+                    }" name="${
+                        c.name
+                    }" tooltip="${label}" data-subs="${c.subs?.join(',')}">${
+                        icon === ''
+                            ? `<span class="text">${label}</span>`
+                            : this.createSVG(c.command.icon)
+                    }${
+                        c.name === 'more'
+                            ? ''
+                            : '<svg width="16" height="16" viewBox="0 0 24 24" class="more-icon"><path d="M7,10L12,15L17,10H7Z" /></svg>'
+                    }</button>`;
+                })
+                .join('');
 
-        this.setupButtons(this.editorContainer);
+            this.editorToolbar.innerHTML = buttons;
 
-        this.toggleButtons(true);
+            this.setupButtons(this.editorContainer);
+
+            this.toggleButtons(true);
+        });
     }
 
     private setupButtons(container: HTMLElement) {
@@ -764,7 +771,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     if (nextTd.nodeName === 'TD' || nextTd.nodeName === 'TH') {
                         items.push(nextTd as HTMLTableCellElement);
                     }
-
                     if (nextTd == endTd) break;
 
                     nextTd = nextTd.nextElementSibling;
@@ -951,6 +957,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     .eo-highlight {
                         background-color: Highlight;
                         color: HighlightText;
+                    }
+                    .eo-lock {
+                        color: #ff0000;
+                    }
+                    .eo-lock::before {
+                        content: '**';
+                        padding-right: 2px;
+                    }
+                    .eo-lock::after {
+                        content: '**';
+                        padding-left: 2px;
                     }
                 </style>`
             );
@@ -2969,6 +2986,22 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             });
     }
 
+    private lock() {
+        const range = this.getFirstRange();
+        const next = range?.commonAncestorContainer?.nextSibling as HTMLElement;
+        const lockClass = 'eo-lock';
+        if (next && next.classList.contains(lockClass)) {
+            const textNode = document.createTextNode(next.textContent ?? '');
+            next.replaceWith(textNode);
+        } else if (range != null && !range.collapsed) {
+            const [_result, node] = this.surroundNode('span');
+            if (node instanceof HTMLSpanElement) {
+                node.classList.add(lockClass);
+                node.contentEditable = 'false';
+            }
+        }
+    }
+
     private toggleSource() {
         // Source button
         const button = this.buttons.source;
@@ -3294,7 +3327,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             let h = `<table ${
                 init
                     ? 'border="0" class="table-cells"'
-                    : 'style="width: 100%; table-layout: fixed;"'
+                    : 'border="1" style="width: 100%; table-layout: fixed;"'
             }>`;
             for (let r = 0; r < rows; r++) {
                 h += '<tr>';
@@ -3406,6 +3439,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             // like "background-color: #f3f3f3; padding: 1em;"
             // Import highlight.js https://highlightjs.org/usage/
             return !this.insertHTML('<pre><code>\n</code></pre>');
+        }
+
+        if (name === 'lock') {
+            this.lock();
+            return false;
         }
 
         if (name === 'symbols') {

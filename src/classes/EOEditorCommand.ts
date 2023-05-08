@@ -124,6 +124,7 @@ export interface IEOEditorCommands {
     justifyLeft: IEOEditorCommand;
     justifyRight: IEOEditorCommand;
     link: IEOEditorCommand;
+    lock: IEOEditorCommand;
     more: IEOEditorCommand;
     object: IEOEditorCommand;
     outdent: IEOEditorCommand;
@@ -320,6 +321,9 @@ export const EOEditorCommands: IEOEditorCommands = {
         icon: '<path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z" />',
         detectTag: 'a'
     },
+    lock: {
+        icon: '<path d="M17,10h-1V8c0-2.205-1.794-4-4-4S8,5.795,8,8v2H7c-1.103,0-2,0.896-2,2v7c0,1.104,0.897,2,2,2h10c1.103,0,2-0.896,2-2v-7  C19,10.896,18.103,10,17,10z M12,18.299c-0.719,0-1.3-0.58-1.3-1.299s0.581-1.301,1.3-1.301s1.3,0.582,1.3,1.301  S12.719,18.299,12,18.299z M14,11h-4V8c0-1.104,0.897-2,2-2s2,0.896,2,2V11z" />'
+    },
     more: {
         icon: '<path d="M16,12A2,2 0 0,1 18,10A2,2 0 0,1 20,12A2,2 0 0,1 18,14A2,2 0 0,1 16,12M10,12A2,2 0 0,1 12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12M4,12A2,2 0 0,1 6,10A2,2 0 0,1 8,12A2,2 0 0,1 6,14A2,2 0 0,1 4,12Z" />'
     },
@@ -431,6 +435,7 @@ export function EOEditorCommandsParse(commands: string | null | undefined) {
                   'iframe'
               ],
               's',
+              'lock',
               'source'
           ];
 
