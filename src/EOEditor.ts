@@ -23,6 +23,8 @@ import { DomUtils, EColor, Utils } from '@etsoo/shared';
 import { VirtualTable } from './classes/VirtualTable';
 import { EOPalette } from './components/EOPalette';
 
+const lockClass = 'eo-lock';
+
 const template = document.createElement('template');
 template.innerHTML = `
     <style>
@@ -2986,14 +2988,26 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             });
     }
 
+    private removeLock(next: HTMLElement) {
+        if (!next.classList.contains(lockClass)) return false;
+        const textNode = document.createTextNode(next.textContent ?? '');
+        next.replaceWith(textNode);
+        return true;
+    }
+
     private lock() {
         const range = this.getFirstRange();
-        const next = range?.commonAncestorContainer?.nextSibling as HTMLElement;
-        const lockClass = 'eo-lock';
-        if (next && next.classList.contains(lockClass)) {
-            const textNode = document.createTextNode(next.textContent ?? '');
-            next.replaceWith(textNode);
-        } else if (range != null && !range.collapsed) {
+        if (range == null) return;
+
+        for (const node of [
+            range.commonAncestorContainer?.nextSibling as HTMLElement,
+            this.getFirstElement(null)
+        ]) {
+            if (node == null || node.classList == null) continue;
+            if (this.removeLock(node)) return;
+        }
+
+        if (!range.collapsed) {
             const [_result, node] = this.surroundNode('span');
             if (node instanceof HTMLSpanElement) {
                 node.classList.add(lockClass);

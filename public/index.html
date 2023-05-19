@@ -31,7 +31,7 @@
         <form onsubmit="console.log('Form submit'); event.preventDefault();">
             <eo-editor
                 name="description"
-                language="zh-CN"
+                language="zh-Hans"
                 activeColor="#ff0000"
                 backupKey="test"
             >
@@ -86,7 +86,7 @@
         <script>
             const editor = document.querySelector('eo-editor');
             editor.addEventListener('backup', (event) => {
-                console.log('backup', event.detail);
+                //console.log('backup', event.detail);
             });
         </script>
     </body>

@@ -66,11 +66,11 @@ const zhHans = DomUtils.zhHans<EOEditorLabelLanguage>(
     () => import('./../i18n/zh-Hans.json')
 );
 
-const zhHant = DomUtils.zhHans<EOEditorLabelLanguage>(
+const zhHant = DomUtils.zhHant<EOEditorLabelLanguage>(
     () => import('./../i18n/zh-Hant.json')
 );
 
-const en = DomUtils.zhHans<EOEditorLabelLanguage>(
+const en = DomUtils.en<EOEditorLabelLanguage>(
     () => import('./../i18n/en.json')
 );
 
