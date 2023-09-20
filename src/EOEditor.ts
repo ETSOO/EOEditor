@@ -19,7 +19,7 @@ import {
     EOEditorCharacterType
 } from './classes/EOEditorCharacters';
 import { EOImageEditor } from './components/EOImageEditor';
-import { DomUtils, EColor, Utils } from '@etsoo/shared';
+import { DomUtils, EColor, ExtendUtils, Utils } from '@etsoo/shared';
 import { VirtualTable } from './classes/VirtualTable';
 import { EOPalette } from './components/EOPalette';
 
@@ -413,11 +413,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     // Color palette
     private palette: EOPalette;
 
-    // Backup seed
-    private backupSeed: number = 0;
+    // Backup cancel
+    private backupCancel?: () => void;
 
-    // Selection change seed
-    private selectionChangeSeed = 0;
+    // Selection change cancel
+    private selectionChangeCancel?: () => void;
 
     // Form element
     private form?: HTMLFormElement | null;
@@ -624,7 +624,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         if (miliseconds < 0) {
             this.backupAction();
         } else {
-            this.backupSeed = window.setTimeout(
+            this.backupCancel = ExtendUtils.waitFor(
                 () => this.backupAction(),
                 miliseconds
             );
@@ -934,7 +934,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             // https://developer.mozilla.org/en-US/docs/Web/CSS/:is
             doc.head.insertAdjacentHTML(
                 'beforeend',
-                `<style>
+                `<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+                <style>
                     body {
                         background-color: #fff;
                         margin: 0px;
@@ -1637,16 +1638,16 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     private clearBackupSeed() {
-        if (this.backupSeed > 0) {
-            window.clearTimeout(this.backupSeed);
-            this.backupSeed = 0;
+        if (this.backupCancel) {
+            this.backupCancel();
+            this.backupCancel = undefined;
         }
     }
 
     private clearSelectionChangeSeed() {
-        if (this.selectionChangeSeed > 0) {
-            window.clearTimeout(this.selectionChangeSeed);
-            this.selectionChangeSeed = 0;
+        if (this.selectionChangeCancel) {
+            this.selectionChangeCancel();
+            this.selectionChangeCancel = undefined;
         }
     }
 
@@ -1688,9 +1689,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
     private onSelectionChange() {
         this.clearSelectionChangeSeed();
-        this.selectionChangeSeed = window.setTimeout(() => {
-            this.onSelectionChangeDirect();
-        }, 50);
+        this.selectionChangeCancel = ExtendUtils.waitFor(
+            () => this.onSelectionChangeDirect(),
+            50
+        );
     }
 
     private setFillColor(key: EOEditorCommandKey, color: string) {
@@ -1962,22 +1964,22 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         return `
         <div class="span3 narrow">
             <input id="${nameTop}" placeholder="${sides[0]}" value="${getValue(
-            nameTop
-        )}"/>
+                nameTop
+            )}"/>
             <button title="${labels.sameValue}">
                 <svg width="16" height="16" viewBox="0 0 24 24" class="inline">${
                     EOEditorSVGs.arrayRight
                 }</svg>
             </button>
             <input id="${nameRight}" placeholder="${
-            sides[1]
-        }" value="${getValue(nameRight)}"/>
+                sides[1]
+            }" value="${getValue(nameRight)}"/>
             <input id="${nameBottom}" placeholder="${
-            sides[2]
-        }" value="${getValue(nameBottom)}"/>
+                sides[2]
+            }" value="${getValue(nameBottom)}"/>
             <input id="${nameLeft}" placeholder="${sides[3]}" value="${getValue(
-            nameLeft
-        )}"/>
+                nameLeft
+            )}"/>
         </div>
         `;
     }
@@ -2411,9 +2413,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 this.popup.hide();
 
                 const caption =
-                    this.popup.querySelector<HTMLTextAreaElement>(
-                        '#caption'
-                    )?.value;
+                    this.popup.querySelector<HTMLTextAreaElement>('#caption')
+                        ?.value;
                 if (caption) {
                     if (table.caption) table.caption.innerHTML = caption!;
                     else {
@@ -2447,9 +2448,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                         '#borderTopWidth'
                     )?.value;
                 let tableBorder =
-                    this.popup.querySelector<HTMLInputElement>(
-                        '#tableBorder'
-                    )?.value;
+                    this.popup.querySelector<HTMLInputElement>('#tableBorder')
+                        ?.value;
                 if (tableBorder && /0[a-z]{0, 2}/i.test(tableBorder))
                     tableBorder = '';
 
@@ -2796,8 +2796,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 <label for="src" class="self">${
                     labels.linkURL
                 }: </label><textarea id="src" maxlength="255" rows="3" class="span3">${
-            element?.src ?? ''
-        }</textarea>
+                    element?.src ?? ''
+                }</textarea>
                 <label for="width">${labels.width}</label>
                 <input type="text" id="width" value="${
                     element?.width ?? '100%'
@@ -2837,17 +2837,15 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 const width =
                     this.popup.querySelector<HTMLInputElement>('#width')?.value;
                 const height =
-                    this.popup.querySelector<HTMLInputElement>(
-                        '#height'
-                    )?.value;
+                    this.popup.querySelector<HTMLInputElement>('#height')
+                        ?.value;
                 const allowfullscreen =
                     this.popup.querySelector<HTMLInputElement>(
                         'input[name="allowfullscreen"]'
                     )?.checked;
                 const border =
-                    this.popup.querySelector<HTMLInputElement>(
-                        '#border'
-                    )?.valueAsNumber;
+                    this.popup.querySelector<HTMLInputElement>('#border')
+                        ?.valueAsNumber;
 
                 if (element) {
                     element.src = src;
@@ -2884,14 +2882,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 <label for="url" class="self">${
                     labels.linkURL
                 }: </label><textarea id="url" maxlength="255" rows="3" style="width:200px;" class="span3">${
-            a?.href ?? ''
-        }</textarea>
+                    a?.href ?? ''
+                }</textarea>
                 <div></div>
                 <div class="span3 flex2"><label><input name="target" type="checkbox" value="_blank"${
                     a?.target === '_blank' ? ' checked' : ''
                 }/>${labels.linkTargetNew}</label>${
-            a == null ? '' : this.createIconButton('unlink')
-        }       </div>
+                    a == null ? '' : this.createIconButton('unlink')
+                }       </div>
                 <div class="full-width"><button class="full-width" name="apply">${
                     labels.apply
                 }</button></div>
@@ -3110,8 +3108,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     <input type="radio" name="way" value="0" checked/>${
                         labels.uploadFromComputer
                     }<svg width="16" height="16" viewBox="0 0 24 24" class="inline">${
-            EOEditorSVGs.upload
-        }</svg>
+                        EOEditorSVGs.upload
+                    }</svg>
                 </label>
                 <input id="imageFile" type="file" multiple accept="image/*" style="width: 200px; opacity: 0">
             </div>
@@ -3138,13 +3136,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     <button title="${
                         labels.delete
                     }" name="delete" disabled>${this.createSVG(
-            EOEditorCommands.delete.icon
-        )}</button>
+                        EOEditorCommands.delete.icon
+                    )}</button>
                     <button title="${
                         labels.edit
                     }" name="edit" disabled>${this.createSVG(
-            EOEditorSVGs.edit
-        )}</button>
+                        EOEditorSVGs.edit
+                    )}</button>
                 </div>
             </div>
             <div class="full-width"><button class="full-width" name="apply" disabled>${

@@ -1,9 +1,11 @@
+import { ExtendUtils } from '@etsoo/shared';
+
 /**
  * EOEditor Popup
  */
 export class EOPopup extends HTMLElement {
-    // Layout update timeout seed
-    private updateSeed: number = 0;
+    // Layout update cancel
+    private updateCancel?: () => void;
 
     /**
      * Auto close when click outside
@@ -122,9 +124,9 @@ export class EOPopup extends HTMLElement {
     }
 
     private clearUpdateSeed() {
-        if (this.updateSeed > 0) {
-            window.clearTimeout(this.updateSeed);
-            this.updateSeed = 0;
+        if (this.updateCancel) {
+            this.updateCancel();
+            this.updateCancel = undefined;
         }
     }
 
@@ -152,7 +154,7 @@ export class EOPopup extends HTMLElement {
         this.clearUpdateSeed();
         this.innerHTML = message;
 
-        this.updateSeed = window.setTimeout(() => {
+        this.updateCancel = ExtendUtils.waitFor(() => {
             this.updatePos(location, insideIFrame);
             this.reshow();
             if (ready) ready();

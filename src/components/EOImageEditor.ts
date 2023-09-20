@@ -1,4 +1,10 @@
-import { DomUtils, Keyboard, NumberUtils, Utils } from '@etsoo/shared';
+import {
+    DomUtils,
+    ExtendUtils,
+    Keyboard,
+    NumberUtils,
+    Utils
+} from '@etsoo/shared';
 import {
     EOEditorHistory,
     EOEditorHistoryState
@@ -530,15 +536,6 @@ export class EOImageEditor extends HTMLElement {
             this.style.setProperty('--color-panel', this.panelColor);
         }
 
-        const closeDiv =
-            this.modalDiv.querySelector<HTMLDivElement>('.close-button');
-        if (closeDiv && this.labels) {
-            closeDiv.title = this.labels.close;
-            closeDiv.addEventListener('click', () => {
-                this.reset();
-            });
-        }
-
         window.addEventListener('resize', this.onResize.bind(this));
         window.addEventListener('keydown', this.onKeypress.bind(this));
     }
@@ -766,6 +763,13 @@ export class EOImageEditor extends HTMLElement {
                         loadFile(file);
                     }
                 });
+            }
+
+            const closeDiv =
+                this.modalDiv.querySelector<HTMLDivElement>('.close-button');
+            if (closeDiv) {
+                closeDiv.title = l.close;
+                closeDiv.addEventListener('click', () => this.reset());
             }
         });
     }
@@ -1441,11 +1445,11 @@ export class EOImageEditor extends HTMLElement {
             l.offsetX
         }" value="${shadow?.offsetX ?? 1}" min="-10" max="10" step="1"/>
   <input type="range" name="shadowOffsetY" title="${l.offsetY}" value="${
-                  shadow?.offsetY ?? 1
-              }" min="-10" max="10" step="1"/>
+      shadow?.offsetY ?? 1
+  }" min="-10" max="10" step="1"/>
   <input type="range" name="shadowBlur" title="${l.blur}" value="${
-                  shadow?.blur ?? 0
-              }" min="0" max="15" step="1"/>`
+      shadow?.blur ?? 0
+  }" min="0" max="15" step="1"/>`
             : '';
 
         const layout = `<label><span>${
@@ -1761,16 +1765,27 @@ export class EOImageEditor extends HTMLElement {
         image.hoverCursor = 'default';
         this.fc.add(image);
 
-        const scrollbarWidth =
-            this.container.offsetWidth - this.container.clientWidth;
-        this.style.setProperty(
-            '--close-button-right',
-            scrollbarWidth > 0 ? `${scrollbarWidth + 8}px` : '8px'
-        );
-
         this.image = image;
 
-        this.setup();
+        ExtendUtils.waitFor(
+            () => {
+                this.setup();
+            },
+            () => {
+                if (this.container.offsetWidth > 0) {
+                    const scrollbarWidth =
+                        this.container.offsetWidth - this.container.clientWidth;
+
+                    this.style.setProperty(
+                        '--close-button-right',
+                        scrollbarWidth > 0 ? `${scrollbarWidth + 8}px` : '8px'
+                    );
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        );
     }
 
     /**
@@ -1886,8 +1901,10 @@ export class EOImageEditor extends HTMLElement {
         const fc = this.fc!;
 
         this.container.style.visibility = 'visible';
+
         this.originalWidth = this.fc?.width;
         this.originalHeight = this.fc?.height;
+
         this.updateSize();
         this.updateStatus();
 
