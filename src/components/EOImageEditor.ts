@@ -401,9 +401,13 @@ export class EOImageEditor extends HTMLElement {
         this.container.addEventListener('click', (e) => {
             clickHandler(e.target);
         });
-        this.container.addEventListener('touchstart', (e) => {
-            clickHandler(e.target);
-        });
+        this.container.addEventListener(
+            'touchstart',
+            (e) => {
+                clickHandler(e.target);
+            },
+            { passive: true }
+        );
 
         this.canvas = shadowRoot.querySelector('canvas')!;
         this.toolbar =
@@ -490,8 +494,8 @@ export class EOImageEditor extends HTMLElement {
             if (x == null || y == null) return;
             adjustMover(x, y);
         };
-        p.addEventListener('touchstart', touchHandler);
-        p.addEventListener('touchmove', touchHandler);
+        p.addEventListener('touchstart', touchHandler, { passive: true });
+        p.addEventListener('touchmove', touchHandler, { passive: true });
 
         document.fonts.ready.then((value) => {
             value.forEach((v) => {
@@ -541,6 +545,7 @@ export class EOImageEditor extends HTMLElement {
     }
 
     disconnectedCallback() {
+        this.hidden = true;
         window.removeEventListener('resize', this.onResize.bind(this));
         window.removeEventListener('keydown', this.onKeypress.bind(this));
     }
@@ -962,9 +967,6 @@ export class EOImageEditor extends HTMLElement {
                 if (pData) {
                     const win = window.open();
                     if (win) {
-                        //win.document.open();
-                        //win.document.write(`<img src="${pData}" />`);
-                        //win.document.close();
                         const img = win.document.createElement('img');
                         img.src = pData;
                         win.document.body.appendChild(img);

@@ -88,7 +88,9 @@ export class EOPalette extends EOPopup {
         }
     }
 
-    disconnectedCallback() {}
+    disconnectedCallback() {
+        this.hide();
+    }
 
     /**
      * Popup palette

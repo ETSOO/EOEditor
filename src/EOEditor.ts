@@ -924,9 +924,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this._editorWindow = win;
         const doc = win.document;
 
-        doc.open();
-        doc.write((this.getBackup() || this.content) ?? this.innerHTML);
-        doc.close();
+        doc.body.innerHTML =
+            (this.getBackup() || this.content) ?? this.innerHTML;
 
         if (doc.body.contentEditable !== 'true') {
             // Default styles
@@ -3399,10 +3398,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 setVisible(row + 1, col + 1, true);
             });
 
-            td.addEventListener('touchmove', () => {
-                const [row, col] = getTDPos(td);
-                setVisible(row + 1, col + 1, true);
-            });
+            td.addEventListener(
+                'touchmove',
+                () => {
+                    const [row, col] = getTDPos(td);
+                    setVisible(row + 1, col + 1, true);
+                },
+                { passive: true }
+            );
 
             td.addEventListener('click', () => {
                 this.popup.hide();

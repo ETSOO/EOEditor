@@ -29,6 +29,7 @@ export class EOButton extends HTMLButtonElement {
     }
 
     disconnectedCallback() {
+        this.hideTooltip();
         this.removeEventListener('mouseenter', this.showTooltip.bind(this));
         this.removeEventListener('mouseleave', this.hideTooltip.bind(this));
         this.removeEventListener('mousedown', this.hideTooltip.bind(this));

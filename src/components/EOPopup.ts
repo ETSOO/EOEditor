@@ -105,6 +105,7 @@ export class EOPopup extends HTMLElement {
     disconnectedCallback() {
         document.removeEventListener('mousedown', this.clickHandler.bind(this));
         this.clearUpdateSeed();
+        this.hide();
     }
 
     /**
