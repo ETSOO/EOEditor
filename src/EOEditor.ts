@@ -675,8 +675,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                         icon === ''
                             ? 'more text'
                             : c.name === 'more'
-                            ? ''
-                            : 'more'
+                              ? ''
+                              : 'more'
                     }" name="${
                         c.name
                     }" tooltip="${label}" data-subs="${c.subs?.join(',')}">${
@@ -1328,6 +1328,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
             // Display
             this.hidden = false;
+
+            this.restoreFocus();
         }
     }
 
@@ -2412,8 +2414,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 this.popup.hide();
 
                 const caption =
-                    this.popup.querySelector<HTMLTextAreaElement>('#caption')
-                        ?.value;
+                    this.popup.querySelector<HTMLTextAreaElement>(
+                        '#caption'
+                    )?.value;
                 if (caption) {
                     if (table.caption) table.caption.innerHTML = caption!;
                     else {
@@ -2447,8 +2450,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                         '#borderTopWidth'
                     )?.value;
                 let tableBorder =
-                    this.popup.querySelector<HTMLInputElement>('#tableBorder')
-                        ?.value;
+                    this.popup.querySelector<HTMLInputElement>(
+                        '#tableBorder'
+                    )?.value;
                 if (tableBorder && /0[a-z]{0, 2}/i.test(tableBorder))
                     tableBorder = '';
 
@@ -2836,15 +2840,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 const width =
                     this.popup.querySelector<HTMLInputElement>('#width')?.value;
                 const height =
-                    this.popup.querySelector<HTMLInputElement>('#height')
-                        ?.value;
+                    this.popup.querySelector<HTMLInputElement>(
+                        '#height'
+                    )?.value;
                 const allowfullscreen =
                     this.popup.querySelector<HTMLInputElement>(
                         'input[name="allowfullscreen"]'
                     )?.checked;
                 const border =
-                    this.popup.querySelector<HTMLInputElement>('#border')
-                        ?.valueAsNumber;
+                    this.popup.querySelector<HTMLInputElement>(
+                        '#border'
+                    )?.valueAsNumber;
 
                 if (element) {
                     element.src = src;
