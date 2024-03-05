@@ -20,14 +20,17 @@ function getColors(doc: Document) {
         const sheet = sheets.item(c);
         if (sheet == null) continue;
 
-        for (let r = 0; r < sheet.cssRules.length; r++) {
-            const rule = sheet.cssRules[r] as CSSStyleRule;
-            if ('style' in rule) {
-                addToColors(colors, rule.style.color);
-                addToColors(colors, rule.style.backgroundColor);
-                addToColors(colors, rule.style.borderColor);
+        // CORS security rules are applicable for style-sheets
+        try {
+            for (let r = 0; r < sheet.cssRules.length; r++) {
+                const rule = sheet.cssRules[r] as CSSStyleRule;
+                if ('style' in rule) {
+                    addToColors(colors, rule.style.color);
+                    addToColors(colors, rule.style.backgroundColor);
+                    addToColors(colors, rule.style.borderColor);
+                }
             }
-        }
+        } catch {}
     }
     return colors;
 }

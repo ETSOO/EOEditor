@@ -1664,6 +1664,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             if (sheet == null) continue;
 
             try {
+                // CORS security rules are applicable for style-sheets
                 // https://stackoverflow.com/questions/49993633/uncaught-domexception-failed-to-read-the-cssrules-property
                 for (const rule of sheet.cssRules) {
                     const styleRule = rule as CSSStyleRule;
