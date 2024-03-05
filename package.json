@@ -1,6 +1,6 @@
 {
     "name": "@etsoo/editor",
-    "version": "1.0.37",
+    "version": "1.0.38",
     "description": "ETSOO Free WYSIWYG HTML Editor",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
@@ -57,7 +57,7 @@
         "webpack-dev-server": "^5.0.2"
     },
     "dependencies": {
-        "@etsoo/shared": "^1.2.34",
+        "@etsoo/shared": "^1.2.35",
         "fabric": "^5.3.0",
         "pica": "^9.0.1"
     }

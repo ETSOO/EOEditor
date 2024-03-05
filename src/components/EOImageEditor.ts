@@ -511,8 +511,8 @@ export class EOImageEditor extends HTMLElement {
     }
 
     async connectedCallback() {
-        const { fabric: f } = await import('fabric');
-        fabric = f;
+        const fm = await import('fabric');
+        fabric = fm.default.fabric;
 
         // https://github.com/fabricjs/fabric.js/issues/3319
         // Change the padding logic to include background-color
