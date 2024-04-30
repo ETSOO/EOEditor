@@ -102,6 +102,7 @@ export interface IEOEditorCommands {
     delete: IEOEditorCommand;
     foreColor: IEOEditorCommand;
     formatBlock: IEOEditorCommand;
+    fullscreen: IEOEditorCommand;
     h1: IEOEditorCommand;
     h2: IEOEditorCommand;
     h3: IEOEditorCommand;
@@ -239,6 +240,9 @@ export const EOEditorCommands: IEOEditorCommands = {
     },
     formatBlock: {
         icon: ''
+    },
+    fullscreen: {
+        icon: '<path d="M24 9h-2v-4h-4v-2h6v6zm-6 12v-2h4v-4h2v6h-6zm-18-6h2v4h4v2h-6v-6zm6-12v2h-4v4h-2v-6h6z"/>'
     },
     h1: {
         icon: '<path d="M3,4H5V10H9V4H11V18H9V12H5V18H3V4M14,18V16H16V6.31L13.5,7.75V5.44L16,4H18V16H20V18H14Z" />',
@@ -390,57 +394,57 @@ export function EOEditorCommandsParse(commands: string | null | undefined) {
     const items: EOEditorCommandsArray = commands?.startsWith('[')
         ? JSON.parse(commands)
         : commands === 'simple'
-        ? ['bold', 'italic', 'underline']
-        : [
-              'undo',
-              'redo',
-              's',
-              ['formatBlock', 'hp', 'h1', 'h2', 'h3', 'h4'],
-              'bold',
-              'italic',
-              'underline',
-              'strikeThrough',
-              'foreColor',
-              'backColor',
-              'style',
-              'removeFormat',
-              's',
-              [
-                  'align',
-                  'justifyLeft',
-                  'justifyCenter',
-                  'justifyRight',
-                  'justifyFull'
-              ],
-              's',
-              'textbox',
-              'insertImage',
-              'link',
-              'insertUnorderedList',
-              'insertOrderedList',
-              'insertTable',
-              [
-                  'more',
-                  'insertHorizontalRule',
-                  'symbols',
-                  'code',
-                  's',
-                  'indent',
-                  'outdent',
-                  's',
-                  'subscript',
-                  'superscript',
-                  's',
-                  'video',
-                  'iframe'
-              ],
-              's',
-              'lock',
-              'source'
-          ];
+          ? ['bold', 'italic', 'underline']
+          : [
+                'undo',
+                'redo',
+                's',
+                ['formatBlock', 'hp', 'h1', 'h2', 'h3', 'h4'],
+                'bold',
+                'italic',
+                'underline',
+                'strikeThrough',
+                'foreColor',
+                'backColor',
+                'style',
+                'removeFormat',
+                's',
+                [
+                    'align',
+                    'justifyLeft',
+                    'justifyCenter',
+                    'justifyRight',
+                    'justifyFull'
+                ],
+                's',
+                'textbox',
+                'insertImage',
+                'link',
+                'insertUnorderedList',
+                'insertOrderedList',
+                'insertTable',
+                [
+                    'more',
+                    'insertHorizontalRule',
+                    'symbols',
+                    'code',
+                    's',
+                    'indent',
+                    'outdent',
+                    's',
+                    'subscript',
+                    'superscript',
+                    's',
+                    'video',
+                    'iframe'
+                ],
+                's',
+                'lock',
+                'source'
+            ];
 
-    // Auto attach about icon
-    items.push('s', 'about');
+    // Auto attach about / fullscreen icon
+    items.push('s', 'about', 'fullscreen');
 
     return items.map((item): IEOEditorCommandCreator => {
         if (Array.isArray(item)) {

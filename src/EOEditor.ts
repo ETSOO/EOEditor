@@ -2780,6 +2780,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.popupContent(html);
     }
 
+    showFullscreen() {
+        this.editorWindow.document.documentElement.requestFullscreen();
+    }
+
     /**
      * Unlink
      * @returns Result
@@ -3438,6 +3442,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     executeCommand(name: EOEditorCommandKey) {
         if (name === 'about') {
             this.showAbout();
+            return true;
+        }
+
+        if (name === 'fullscreen') {
+            this.showFullscreen();
             return true;
         }
 
