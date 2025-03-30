@@ -1,6 +1,6 @@
 {
   "name": "@etsoo/editor",
-  "version": "1.0.42",
+  "version": "1.0.43",
   "description": "ETSOO Free WYSIWYG HTML Editor",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -48,6 +48,8 @@
     "@babel/preset-typescript": "^7.27.0",
     "@types/pica": "^9.0.5",
     "babel-loader": "^10.0.0",
+    "css-loader": "^7.1.2",
+    "css-minimizer-webpack-plugin": "^7.0.2",
     "terser-webpack-plugin": "^5.3.14",
     "typescript": "^5.8.2",
     "webpack": "^5.98.0",

@@ -1,19 +1,19 @@
 {
-    "compilerOptions": {
-        /* Visit https://aka.ms/tsconfig.json to read more about this file */
-        "target": "ES2020",
-        "module": "ESNext",
-        "moduleResolution": "Node10",
-        "isolatedModules": true,
-        "resolveJsonModule": true,
-        "outDir": "./lib",
-        "sourceMap": true,
-        "declaration": true,
-        "noEmit": false,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "strict": true,
-        "skipLibCheck": true
-    },
-    "include": ["src"]
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig.json to read more about this file */
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node10",
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "outDir": "./lib",
+    "sourceMap": true,
+    "declaration": true,
+    "noEmit": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
 }

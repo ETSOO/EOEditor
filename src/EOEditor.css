@@ -1,0 +1,291 @@
+:host {
+  --color: RGB(0, 0, 0);
+  --color-active-bg: RGBA(48, 58, 178, 0.2);
+  --color-hover-bg: RGBA(48, 58, 178, 0.05);
+  --color-active: RGB(48, 58, 178);
+  --width: auto;
+  --height: 60vh;
+  --radius: 4px;
+  user-select: none;
+}
+
+.container {
+  border: 1.5px outset;
+  border-radius: var(--radius);
+}
+
+.toolbar {
+  padding: 0.5em;
+  border-bottom: 1px #dfdfdf solid;
+  display: flex;
+  flex-wrap: wrap;
+}
+.toolbar svg.color-indicator {
+  transform: translate(3px, -16px);
+}
+.toolbar div.separator,
+eo-popup .icons div.separator {
+  border-left: 1px solid #ccc;
+  height: 21px;
+  margin: 4px 6px;
+  display: inline-block;
+}
+.toolbar button,
+eo-popup .icons button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: calc(var(--radius) * 0.75);
+  margin: 0px 1px;
+  padding: 3px;
+  width: 30px;
+  height: 30px;
+  text-align: left;
+}
+.toolbar button.autosize,
+eo-popup .icons button.autosize {
+  width: auto;
+  height: auto;
+  padding: 3px 6px;
+}
+.toolbar button.more {
+  width: 42px;
+}
+.toolbar button.text {
+  width: 98px !important;
+}
+eo-popup.top-popup {
+  z-index: 991;
+}
+eo-popup .icons {
+  display: flex;
+}
+eo-popup .icons button.line {
+  width: 180px !important;
+  height: 56px !important;
+  display: flex;
+  align-items: center;
+  border-radius: 0px;
+  padding: 3px 9px;
+}
+eo-popup .icons button.line:nth-child(2n + 1) {
+  background-color: #f6f6f6;
+}
+eo-popup .content {
+  font-size: 12px;
+  padding: 0px 1em;
+}
+eo-popup .content1 {
+  font-size: 12px;
+  padding: 1em;
+}
+eo-popup .grid {
+  padding: 1em;
+  font-size: 12px;
+  display: grid;
+  grid-template-columns: 78px 1fr 78px 1fr;
+  align-items: center;
+  column-gap: 9px;
+  row-gap: 9px;
+}
+eo-popup .grid input[type="text"],
+eo-popup .grid input[type="number"] {
+  width: 72px;
+}
+eo-popup .grid .grid-title {
+  grid-column: 1 / -1;
+  font-weight: bold;
+}
+eo-popup .grid .self {
+  align-self: start;
+  padding-top: 4px;
+}
+eo-popup .grid .span3 {
+  grid-column: 2 / span 3;
+}
+eo-popup .grid .full-width {
+  grid-column: 1 / -1;
+}
+eo-popup .flex2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+eo-popup .flex2 *:first-child {
+  flex-grow: 1;
+}
+eo-popup button.full-width {
+  width: 100%;
+}
+eo-popup .icon-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+}
+eo-popup .icon-button svg {
+  margin-right: 4px;
+}
+eo-popup .tab-page {
+  padding: 12px;
+  width: min(75vw, 640px);
+  font-size: 14px;
+}
+eo-popup .tab-page .tabs {
+  display: flex;
+  flex-wrap: no-wrap;
+  padding-bottom: 6px;
+}
+eo-popup .tab-page .tabs .tab {
+  padding-right: 6px;
+}
+eo-popup .tab-page .latest {
+  margin-bottom: 6px;
+}
+eo-popup .tab-page .tab-content {
+  height: calc(var(--height) - 120px);
+  overflow: auto;
+}
+
+eo-popup .tab-page .tab-content .items div,
+eo-popup .tab-page .latest div {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  text-align: center;
+  line-height: 28px;
+  vertical-align: middle;
+  border: 1px outset #ccc;
+  display: inline-block;
+  cursor: pointer;
+}
+eo-popup .tab-page .items div:hover,
+eo-popup .tab-page .latest div:hover {
+  color: var(--color-active);
+  background-color: var(--color-active-bg);
+}
+eo-popup .tab-page .items div:hover:after,
+eo-popup .tab-page .latest div:hover:after {
+  content: attr(data-preview);
+  font-size: 60px;
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  padding: 12px;
+  text-align: center;
+  margin-left: 9px;
+  margin-top: -86px;
+  line-height: 60px;
+  vertical-align: middle;
+  border: 1px var(--color-active) solid;
+  background-color: #fff;
+}
+.toolbar button.more span.text {
+  font-size: 13px;
+  padding: 0px 4px;
+  min-width: 72px;
+}
+.toolbar button.more span.text,
+.toolbar button.more svg,
+svg.inline {
+  vertical-align: middle;
+  display: inline-block;
+}
+.toolbar button.more svg.more-icon {
+  margin-left: -3px;
+  margin-right: -3px;
+  margin-bottom: 4px;
+}
+.toolbar button:enabled,
+eo-popup .icons button {
+  color: var(--color);
+}
+.toolbar button:enabled svg,
+eo-popup .icons button svg {
+  fill: var(--color);
+}
+.toolbar button:enabled:not(.active):hover,
+eo-popup .icons button:not(.active):hover {
+  background-color: var(--color-hover-bg);
+}
+.toolbar button:enabled:active,
+.toolbar button.active,
+eo-popup .icons button:active,
+eo-popup .icons button.active {
+  background-color: var(--color-active-bg) !important;
+}
+.toolbar button:enabled:hover,
+.toolbar button.active,
+eo-popup .icons button:hover,
+eo-popup .icons button.active {
+  color: var(--color-active);
+}
+.toolbar button:enabled:hover svg,
+.toolbar button.active svg,
+eo-popup .icons button:hover svg,
+eo-popup .icons button.active svg {
+  fill: var(--color-active);
+}
+.toolbar button:disabled,
+eo-popup button:disabled {
+  color: RGBA(0, 0, 0, 0.33);
+}
+.toolbar button:disabled svg,
+eo-popup button:disabled svg {
+  fill: RGBA(0, 0, 0, 0.33);
+}
+
+.edit-area {
+  box-sizing: border-box;
+  width: var(--width);
+  height: var(--height);
+  overflow: hidden;
+}
+.edit-area iframe {
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+}
+.edit-area textarea {
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  padding: 0.5em;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+/** Insert image **/
+.preview-container {
+  position: relative;
+  width: min(80vw, 480px);
+  height: 320px;
+  overflow: auto;
+  margin: 6px 0px;
+}
+.preview-container img {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  display: none;
+}
+
+/** Insert table **/
+.table-cells td {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #ccc;
+}
+.table-cells td.hidden {
+  display: none;
+}
+.table-cells td.focus {
+  background-color: var(--color-active-bg);
+}
+
+/** popupTextbox **/
+div.narrow input {
+  width: 44.5px !important;
+}

@@ -1,0 +1,40 @@
+body {
+  background-color: #fff;
+  margin: 0px;
+  padding: 0.5em;
+}
+pre {
+  background-color: #f3f3f3;
+  padding: 12px;
+}
+table:not([border]) td,
+table:not([border]) th,
+table[border="0"] td,
+table[border="0"] th {
+  border: 1px dotted #ccc;
+}
+img,
+iframe {
+  cursor: move;
+  border: 6px double #ccc;
+  box-sizing: border-box;
+}
+.eo-textbox {
+  border: 6px double #ccc;
+  box-sizing: border-box;
+}
+.eo-highlight {
+  background-color: Highlight;
+  color: HighlightText;
+}
+.eo-lock {
+  color: #ff0000;
+}
+.eo-lock::before {
+  content: "**";
+  padding-right: 2px;
+}
+.eo-lock::after {
+  content: "**";
+  padding-left: 2px;
+}

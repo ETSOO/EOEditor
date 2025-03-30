@@ -7,46 +7,46 @@ let tooltipDiv: HTMLElement | null;
  * EOEditor extended button
  */
 export class EOButton extends HTMLButtonElement {
-    /**
-     * Tooltip
-     */
-    get tooltip() {
-        return this.getAttribute('tooltip');
-    }
-    set tooltip(value: string | null) {
-        if (value) this.setAttribute('tooltip', value);
-        else this.removeAttribute('tooltip');
-    }
+  /**
+   * Tooltip
+   */
+  get tooltip() {
+    return this.getAttribute("tooltip");
+  }
+  set tooltip(value: string | null) {
+    if (value) this.setAttribute("tooltip", value);
+    else this.removeAttribute("tooltip");
+  }
 
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 
-    connectedCallback() {
-        this.addEventListener('mouseenter', this.showTooltip.bind(this));
-        this.addEventListener('mouseleave', this.hideTooltip.bind(this));
-        this.addEventListener('mousedown', this.hideTooltip.bind(this));
-    }
+  connectedCallback() {
+    this.addEventListener("mouseenter", this.showTooltip.bind(this));
+    this.addEventListener("mouseleave", this.hideTooltip.bind(this));
+    this.addEventListener("mousedown", this.hideTooltip.bind(this));
+  }
 
-    disconnectedCallback() {
-        this.hideTooltip();
-        this.removeEventListener('mouseenter', this.showTooltip.bind(this));
-        this.removeEventListener('mouseleave', this.hideTooltip.bind(this));
-        this.removeEventListener('mousedown', this.hideTooltip.bind(this));
-    }
+  disconnectedCallback() {
+    this.hideTooltip();
+    this.removeEventListener("mouseenter", this.showTooltip.bind(this));
+    this.removeEventListener("mouseleave", this.hideTooltip.bind(this));
+    this.removeEventListener("mousedown", this.hideTooltip.bind(this));
+  }
 
-    hideTooltip() {
-        if (tooltipDiv == null) return;
-        tooltipDiv.hidden = true;
-    }
+  hideTooltip() {
+    if (tooltipDiv == null) return;
+    tooltipDiv.hidden = true;
+  }
 
-    showTooltip() {
-        if (this.tooltip == null) return;
+  showTooltip() {
+    if (this.tooltip == null) return;
 
-        if (tooltipDiv == null) {
-            document.head.insertAdjacentHTML(
-                'beforeend',
-                `<style>
+    if (tooltipDiv == null) {
+      document.head.insertAdjacentHTML(
+        "beforeend",
+        `<style>
                     #EOEditorTooltipDiv {
                         position: absolute;
                         font-size: 12px;
@@ -88,40 +88,40 @@ export class EOButton extends HTMLButtonElement {
                         border-bottom: 4px solid #000;
                     }
                 </style>`
-            );
+      );
 
-            tooltipDiv = document.createElement('div');
-            tooltipDiv.id = 'EOEditorTooltipDiv';
-            document.documentElement.appendChild(tooltipDiv);
-        }
-
-        tooltipDiv.innerHTML = this.tooltip;
-        tooltipDiv.hidden = false;
-        const divRect = tooltipDiv.getBoundingClientRect();
-
-        const rect = this.getBoundingClientRect();
-
-        // Middle
-        let left = rect.left - (divRect.width - rect.width) / 2;
-        if (left < 0) {
-            // Left
-            left = rect.left;
-            tooltipDiv.classList.add('tooltip-start');
-        } else {
-            tooltipDiv.classList.remove('tooltip-start');
-
-            if (left + divRect.width > window.innerWidth) {
-                // Right
-                left = rect.right - divRect.width;
-                tooltipDiv.classList.add('tooltip-end');
-            } else {
-                tooltipDiv.classList.remove('tooltip-end');
-            }
-        }
-
-        tooltipDiv.style.left = `${window.scrollX + left}px`;
-        tooltipDiv.style.top = `${window.scrollY + rect.bottom + 4}px`;
+      tooltipDiv = document.createElement("div");
+      tooltipDiv.id = "EOEditorTooltipDiv";
+      document.documentElement.appendChild(tooltipDiv);
     }
+
+    tooltipDiv.innerHTML = this.tooltip;
+    tooltipDiv.hidden = false;
+    const divRect = tooltipDiv.getBoundingClientRect();
+
+    const rect = this.getBoundingClientRect();
+
+    // Middle
+    let left = rect.left - (divRect.width - rect.width) / 2;
+    if (left < 0) {
+      // Left
+      left = rect.left;
+      tooltipDiv.classList.add("tooltip-start");
+    } else {
+      tooltipDiv.classList.remove("tooltip-start");
+
+      if (left + divRect.width > window.innerWidth) {
+        // Right
+        left = rect.right - divRect.width;
+        tooltipDiv.classList.add("tooltip-end");
+      } else {
+        tooltipDiv.classList.remove("tooltip-end");
+      }
+    }
+
+    tooltipDiv.style.left = `${window.scrollX + left}px`;
+    tooltipDiv.style.top = `${window.scrollY + rect.bottom + 4}px`;
+  }
 }
 
-customElements.define('eo-button', EOButton, { extends: 'button' });
+customElements.define("eo-button", EOButton, { extends: "button" });

@@ -1,23 +1,23 @@
-import { EHistory } from '@etsoo/shared';
+import { EHistory } from "@etsoo/shared";
 
 /**
  * EOEditor history state
  */
 export interface EOEditorHistoryState {
-    /**
-     * Title
-     */
-    title: string;
+  /**
+   * Title
+   */
+  title: string;
 
-    /**
-     * Current (redo) action
-     */
-    action: () => unknown;
+  /**
+   * Current (redo) action
+   */
+  action: () => unknown;
 
-    /**
-     * Undo action
-     */
-    undo: () => unknown;
+  /**
+   * Undo action
+   */
+  undo: () => unknown;
 }
 
 /**
