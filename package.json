@@ -1,6 +1,6 @@
 {
   "name": "@etsoo/editor",
-  "version": "1.0.44",
+  "version": "1.0.45",
   "description": "ETSOO Free WYSIWYG HTML Editor",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "start": "webpack serve",
     "build": "webpack --mode production --no-devtool",
     "webpack": "webpack",
-    "tsc": "tsc && copyfiles -u 1 ./src/**/*.css lib/",
+    "tsc": "tsc && copyfiles -u 1 ./src/**/*.css ./lib/ && echo 'CSS files copied'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
