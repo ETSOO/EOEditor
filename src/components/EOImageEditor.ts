@@ -16,10 +16,9 @@ import {
 } from './EOImageEditorLabels';
 import { EOPalette } from './EOPalette';
 import { EOPopup } from './EOPopup';
-import type { fabric as _f } from 'fabric';
+import type * as FabricType from 'fabric';
 
-type f = typeof _f;
-let fabric: f;
+let fabric: typeof FabricType;
 
 /**
  * EOEditor Image Editor commands
@@ -68,17 +67,17 @@ export class EOImageEditor extends HTMLElement {
     /**
      * Fabric canvas
      */
-    private fc?: fabric.Canvas;
+    private fc?: FabricType.Canvas;
 
     /**
      * Main image
      */
-    private image?: fabric.Image;
+    private image?: FabricType.FabricImage;
 
     /**
      * Current active object
      */
-    private activeObject: fabric.Object | null | undefined;
+    private activeObject?: FabricType.FabricObject | null;
 
     /**
      * Complete callback
@@ -169,6 +168,8 @@ export class EOImageEditor extends HTMLElement {
 
     constructor() {
         super();
+
+        this.hidden = true;
 
         const xs = window.innerWidth < 480;
         this.xs = xs;
@@ -511,22 +512,20 @@ export class EOImageEditor extends HTMLElement {
     }
 
     async connectedCallback() {
-        const fm = await import('fabric');
-        fabric = fm.default.fabric;
+        // Load the library dynamically
+        fabric = await import('fabric');
 
         // https://github.com/fabricjs/fabric.js/issues/3319
         // Change the padding logic to include background-color
-        (fabric.Text as any).prototype.set({
+        fabric.Textbox.prototype.set({
             _getNonTransformedDimensions() {
-                // Object dimensions
                 return new fabric.Point(this.width, this.height).scalarAdd(
                     this.padding
                 );
             },
             _calculateCurrentDimensions() {
                 // Controls dimensions
-                return fabric.util.transformPoint(
-                    this._getTransformedDimensions(),
+                return this._getNonTransformedDimensions().transform(
                     this.getViewportTransform(),
                     true
                 );
@@ -730,11 +729,11 @@ export class EOImageEditor extends HTMLElement {
             const loadFile = (file: File) => {
                 if (!file.type.startsWith('image/')) return;
                 DomUtils.fileToDataURL(file).then((data) => {
-                    fabric.Image.fromURL(data, (image) => {
+                    fabric.FabricImage.fromURL(data).then((image) => {
                         const imageState: EOEditorHistoryState = {
                             title: l.image,
                             action: () => {
-                                image.lockUniScaling = true;
+                                //image.lockUniScaling = true;
                                 image.setControlsVisibility({
                                     mt: false, // middle top disable
                                     mb: false, // midle bottom
@@ -786,7 +785,9 @@ export class EOImageEditor extends HTMLElement {
     private clear() {
         if (this.fc == null) return;
         this.fc.remove(
-            ...this.fc.getObjects('rect').filter((r) => r.name === 'crop')
+            ...this.fc
+                .getObjects('rect')
+                .filter((r) => Reflect.get(r, 'name') === 'crop')
         );
         this.fc.remove(
             ...this.fc
@@ -795,7 +796,7 @@ export class EOImageEditor extends HTMLElement {
                     (t) => t instanceof fabric.IText && t.text?.trim() === ''
                 )
         );
-        this.fc.discardActiveObject().renderAll();
+        this.fc.discardActiveObject();
     }
 
     private setCursor(cursor: string = 'default') {
@@ -819,7 +820,8 @@ export class EOImageEditor extends HTMLElement {
     }
 
     private doAction(name: string, b?: HTMLButtonElement) {
-        if (this.fc == null) return;
+        const fc = this.fc;
+        if (fc == null) return;
         const o = this.activeObject ?? this.image;
         const l = this.labels!;
 
@@ -830,30 +832,31 @@ export class EOImageEditor extends HTMLElement {
 
         switch (name) {
             case 'bringToBack':
-                // o?.sendToBack();
+                if (o == null) return;
                 const bringToBackState: EOEditorHistoryState = {
                     title: l.bringToBack,
-                    action: () => o?.sendBackwards(true),
-                    undo: () => o?.bringForward(true)
+                    action: () => fc.sendObjectBackwards(o, true),
+                    undo: () => fc.bringObjectForward(o, true)
                 };
                 bringToBackState.action();
                 this.history?.pushState(bringToBackState);
                 break;
             case 'bringToFront':
-                // o?.bringToFront();
+                if (o == null) return;
                 const bringToFrontState: EOEditorHistoryState = {
                     title: l.bringToBack,
-                    action: () => o?.bringForward(true),
-                    undo: () => o?.sendBackwards(true)
+                    action: () => fc.bringObjectForward(o, true),
+                    undo: () => fc.sendObjectBackwards(o, true)
                 };
                 bringToFrontState.action();
                 this.history?.pushState(bringToFrontState);
                 break;
             case 'complete':
                 this.clear();
-                const data = this.fc.toDataURL({
+                const data = fc.toDataURL({
                     format: this.pngFormat?.checked ? 'png' : 'jpeg',
-                    quality: 1
+                    quality: 1,
+                    multiplier: 1
                 });
                 if (data) {
                     if (this.callback) this.callback(data);
@@ -861,15 +864,15 @@ export class EOImageEditor extends HTMLElement {
                 this.reset();
                 break;
             case 'crop':
-                if (o?.type === 'rect' && o.name === 'crop') {
+                if (o?.type === 'rect' && Reflect.get(o, 'name') === 'crop') {
                     // Size
                     const { width, height, left = 0, top = 0 } = o;
                     if (width == null || height == null) return;
 
                     // Cache sizes
                     const sizes = [
-                        this.fc.getWidth(),
-                        this.fc.getHeight(),
+                        fc.getWidth(),
+                        fc.getHeight(),
                         this.originalWidth,
                         this.originalHeight
                     ];
@@ -877,9 +880,7 @@ export class EOImageEditor extends HTMLElement {
                     const cropState: EOEditorHistoryState = {
                         title: l.crop,
                         action: () => {
-                            if (this.fc == null) return;
-
-                            const zoom = this.fc.getZoom();
+                            const zoom = fc.getZoom();
                             const scaleX = o.scaleX ?? 1;
                             const scaleY = o.scaleY ?? 1;
 
@@ -892,29 +893,27 @@ export class EOImageEditor extends HTMLElement {
 
                             // Apply
                             // https://stackoverflow.com/questions/44437734/image-clipping-with-visible-overflow-in-fabricjs/44454016#44454016
-                            this.fc.clipPath = o;
+                            fc.clipPath = o;
 
                             // Size
-                            this.fc.setWidth(nw);
-                            this.fc.setHeight(nh);
-                            this.fc.absolutePan(new fabric.Point(nl, nt));
+                            fc.setWidth(nw);
+                            fc.setHeight(nh);
+                            fc.absolutePan(new fabric.Point(nl, nt));
 
                             this.originalWidth = width * scaleX;
                             this.originalHeight = height * scaleY;
 
                             this.updateSize();
 
-                            this.fc.remove(o);
+                            fc.remove(o);
                         },
                         undo: () => {
-                            if (this.fc == null) return;
-
-                            this.fc.clipPath = undefined;
+                            fc.clipPath = undefined;
 
                             // Size
-                            this.fc.setWidth(sizes[0]!);
-                            this.fc.setHeight(sizes[1]!);
-                            this.fc.absolutePan(new fabric.Point(0, 0));
+                            fc.width = sizes[0]!;
+                            fc.height = sizes[1]!;
+                            fc.absolutePan(new fabric.Point(0, 0));
 
                             this.originalWidth = sizes[2];
                             this.originalHeight = sizes[3];
@@ -929,40 +928,40 @@ export class EOImageEditor extends HTMLElement {
                 }
                 break;
             case 'delete':
-                const objs = this.fc.getActiveObjects();
+                const objs = fc.getActiveObjects();
                 if (objs) {
                     const deleteState: EOEditorHistoryState = {
                         title: `${l.delete}`,
-                        action: () => this.fc?.remove(...objs),
-                        undo: () => this.fc?.add(...objs)
+                        action: () => fc.remove(...objs),
+                        undo: () => fc.add(...objs)
                     };
                     deleteState.action();
                     this.history?.pushState(deleteState);
                 }
                 break;
             case 'filter':
-                if (o instanceof fabric.Image) this.filterSettings(o);
+                if (o instanceof fabric.FabricImage) this.filterSettings(o);
                 break;
             case 'hcenter':
                 if (o) {
-                    const hZoom = this.fc?.getZoom() ?? 1;
+                    const hZoom = fc.getZoom() ?? 1;
                     if (hZoom === 1) {
-                        o.centerH();
+                        fc.centerObjectH(o);
                     } else {
                         const hCenter =
-                            ((this.fc.width ?? 0) / hZoom -
+                            (fc.width / hZoom -
                                 (o.width ?? 0) * (o.scaleX ?? 1)) /
                             2;
                         o.left = hCenter;
-                        this.fc.renderAll();
                     }
                 }
                 break;
             case 'preview':
                 this.clear();
-                const pData = this.fc.toDataURL({
+                const pData = fc.toDataURL({
                     format: this.pngFormat?.checked ? 'png' : 'jpeg',
-                    quality: 1
+                    quality: 1,
+                    multiplier: 1
                 });
                 if (pData) {
                     const win = window.open();
@@ -1009,31 +1008,30 @@ export class EOImageEditor extends HTMLElement {
                 break;
             case 'vcenter':
                 if (o) {
-                    const vZoom = this.fc?.getZoom() ?? 1;
+                    const vZoom = fc.getZoom();
                     if (vZoom === 1) {
-                        o.centerV();
+                        fc.centerObjectV(o);
                     } else {
                         const vCenter =
-                            ((this.fc.height ?? 0) / vZoom -
+                            (fc.height / vZoom -
                                 (o.height ?? 0) * (o.scaleY ?? 1)) /
                             2;
                         o.top = vCenter;
-                        this.fc.renderAll();
                     }
                 }
                 break;
             case 'zoomIn':
-                const zi = (this.fc.getZoom() + 0.1).toExact();
+                const zi = (fc.getZoom() + 0.1).toExact();
                 if (zi > 10) return;
 
                 const zoomInState: EOEditorHistoryState = {
                     title: `${l.zoomIn}: ${zi}`,
                     action: () => {
-                        this.fc!.setZoom(zi);
+                        fc.setZoom(zi);
                         this.updateZoomSize();
                     },
                     undo: () => {
-                        this.fc?.setZoom(zi - 0.1);
+                        fc.setZoom(zi - 0.1);
                         this.updateZoomSize();
                     }
                 };
@@ -1043,17 +1041,17 @@ export class EOImageEditor extends HTMLElement {
 
                 break;
             case 'zoomOut':
-                const zo = (this.fc.getZoom() - 0.1).toExact();
+                const zo = (fc.getZoom() - 0.1).toExact();
                 if (zo <= 0.1) return;
 
                 const zoomOutState: EOEditorHistoryState = {
                     title: `${l.zoomOut}: ${zo}`,
                     action: () => {
-                        this.fc?.setZoom(zo);
+                        fc.setZoom(zo);
                         this.updateZoomSize();
                     },
                     undo: () => {
-                        this.fc!.setZoom(zo + 0.1);
+                        fc.setZoom(zo + 0.1);
                         this.updateZoomSize();
                     }
                 };
@@ -1064,7 +1062,7 @@ export class EOImageEditor extends HTMLElement {
                 break;
         }
 
-        this.fc?.renderAll();
+        fc.renderAll();
     }
 
     private updateZoomSize() {
@@ -1171,9 +1169,9 @@ export class EOImageEditor extends HTMLElement {
                     });
 
                     if (custom) {
-                        rect.lockUniScaling = false;
+                        //rect.lockUniScaling = false;
                     } else {
-                        rect.lockUniScaling = true;
+                        //rect.lockUniScaling = true;
                         rect.setControlsVisibility({
                             mt: false, // middle top disable
                             mb: false, // midle bottom
@@ -1183,7 +1181,7 @@ export class EOImageEditor extends HTMLElement {
                     }
 
                     this.fc.add(rect);
-                    rect.bringToFront();
+                    this.fc.bringObjectToFront(rect);
                     this.fc.setActiveObject(rect);
 
                     // Scroll to here
@@ -1195,7 +1193,7 @@ export class EOImageEditor extends HTMLElement {
             });
     }
 
-    private filterSettings(o: fabric.Image) {
+    private filterSettings(o: FabricType.FabricImage) {
         const fname = 'filter';
         if (this.isSettingShowing(fname)) return;
 
@@ -1282,7 +1280,7 @@ export class EOImageEditor extends HTMLElement {
             .join('');
         this.showSettings(layout, fname, 'form');
 
-        const f = fabric.Image.filters;
+        const f = fabric.filters;
 
         this.settings
             .querySelectorAll<HTMLInputElement>('input')
@@ -1348,7 +1346,7 @@ export class EOImageEditor extends HTMLElement {
             });
     }
 
-    private imageSettings(o: fabric.Image) {
+    private imageSettings(o: FabricType.FabricImage) {
         const layout = `<label>${this.labels?.opacity} <input type="range" name="opacity" value="${o.opacity}" min="0.1" max="1" step="0.1"/></label>`;
 
         this.showSettings(layout, 'image', 'flex');
@@ -1368,7 +1366,7 @@ export class EOImageEditor extends HTMLElement {
                 this.settings.querySelector<HTMLInputElement>(
                     'input[name="shadowColor"]'
                 );
-            let shadow: fabric.Shadow | undefined;
+            let shadow: FabricType.Shadow | undefined;
             const color = shadowColorInput?.value;
             if (color) {
                 const offsetX =
@@ -1428,7 +1426,7 @@ export class EOImageEditor extends HTMLElement {
         return undefined;
     }
 
-    private textSettings(o?: fabric.IText) {
+    private textSettings(o?: FabricType.IText) {
         const l = this.labels!;
 
         let shadow = o?.shadow
@@ -1610,15 +1608,15 @@ export class EOImageEditor extends HTMLElement {
                             switch (name) {
                                 case 'shadowOffsetX':
                                     shadow.offsetX =
-                                        shadowOffsetXInput?.valueAsNumber;
+                                        shadowOffsetXInput?.valueAsNumber ?? 0;
                                     break;
                                 case 'shadowOffsetY':
                                     shadow.offsetY =
-                                        shadowOffsetYInput?.valueAsNumber;
+                                        shadowOffsetYInput?.valueAsNumber ?? 0;
                                     break;
                                 case 'shadowBlur':
                                     shadow.blur =
-                                        shadowBlurInput?.valueAsNumber;
+                                        shadowBlurInput?.valueAsNumber ?? 0;
                                     break;
                                 default:
                                     shadow.color = color;
@@ -1684,12 +1682,13 @@ export class EOImageEditor extends HTMLElement {
         return false;
     }
 
-    private doRotate(o: fabric.Object, angle: number) {
+    private doRotate(o: FabricType.Object, angle: number) {
         let na = (o.angle ?? 0) + angle;
         if (na >= 360) na -= 360;
         else if (na < 0) na += 360;
 
-        o.rotate(na).setCoords();
+        o.rotate(na);
+        o.setCoords();
 
         const i = this.image;
         // Main image
@@ -1751,7 +1750,7 @@ export class EOImageEditor extends HTMLElement {
         }
     }
 
-    addImage(image: fabric.Image) {
+    addImage(image: FabricType.FabricImage) {
         const w = image.width;
         const h = image.height;
         if (w == null || h == null) return;
@@ -1762,7 +1761,6 @@ export class EOImageEditor extends HTMLElement {
             height: h
         });
 
-        image.name = 'editingImage';
         image.selectable = false;
         image.hoverCursor = 'default';
         this.fc.add(image);
@@ -1803,18 +1801,18 @@ export class EOImageEditor extends HTMLElement {
         if (img) {
             // default fabric.textureSize is 2048 x 2048, 4096 x 4096 probably support
             const maxSize = 2048;
-            fabric.textureSize = maxSize;
+            fabric.config.textureSize = maxSize;
 
             if (img.width > maxSize || img.height > maxSize) {
                 ImageUtils.resize(img, ImageUtils.calcMax(img, maxSize)).then(
                     (canvas) => {
                         this.setPngFormat(img.src);
-                        const image = new fabric.Image(canvas);
+                        const image = new fabric.FabricImage(canvas);
                         this.addImage(image);
                     }
                 );
             } else {
-                const image = new fabric.Image(img);
+                const image = new fabric.FabricImage(img);
                 this.setPngFormat(img.src);
                 this.addImage(image);
             }
@@ -1978,8 +1976,10 @@ export class EOImageEditor extends HTMLElement {
             this.updateStatus();
         });
 
-        let objectLastPos: [fabric.Object, number?, number?] | undefined;
-        let movingIndicator: fabric.IText | undefined;
+        let objectLastPos:
+            | [FabricType.FabricObject, number?, number?]
+            | undefined;
+        let movingIndicator: FabricType.IText | undefined;
         fc.on('object:moving', (e) => {
             if (objectLastPos == null && e.target) {
                 objectLastPos = [e.target, e.target.left, e.target.top];
@@ -2031,14 +2031,18 @@ export class EOImageEditor extends HTMLElement {
             }
         });
 
-        let objectLastScale: [fabric.Object, number?, number?] | undefined;
+        let objectLastScale:
+            | [FabricType.FabricObject, number?, number?]
+            | undefined;
         fc.on('object:scaling', (e) => {
             if (objectLastScale == null && e.target) {
                 objectLastScale = [e.target, e.target.scaleX, e.target.scaleY];
             }
         });
 
-        let objectLastRotate: [fabric.Object, number?] | undefined;
+        let objectLastRotate:
+            | [FabricType.FabricObject, FabricType.TDegree?]
+            | undefined;
         fc.on('object:rotating', (e) => {
             if (objectLastRotate == null && e.target) {
                 objectLastRotate = [e.target, e.target.angle];
@@ -2057,8 +2061,8 @@ export class EOImageEditor extends HTMLElement {
                         mObject.top = top;
                     },
                     undo: () => {
-                        mObject.left = pLeft;
-                        mObject.top = pTop;
+                        if (pLeft != null) mObject.left = pLeft;
+                        if (pTop != null) mObject.top = pTop;
                     }
                 };
                 this.history?.pushState(moveState);
@@ -2083,8 +2087,8 @@ export class EOImageEditor extends HTMLElement {
                         sObject.scaleY = scaleY;
                     },
                     undo: () => {
-                        sObject.scaleX = sx;
-                        sObject.scaleY = sy;
+                        if (sx != null) sObject.scaleX = sx;
+                        if (sy != null) sObject.scaleY = sy;
                     }
                 };
                 this.history?.pushState(scaleState);
@@ -2103,7 +2107,7 @@ export class EOImageEditor extends HTMLElement {
                         sObject.angle = angle;
                     },
                     undo: () => {
-                        sObject.angle = sa;
+                        if (sa) sObject.angle = sa;
                     }
                 };
                 this.history?.pushState(rotateState);
@@ -2115,9 +2119,9 @@ export class EOImageEditor extends HTMLElement {
             if (this.textInput) {
                 const zoom = this.fc!.getZoom();
                 let left: number, top: number;
-                if (e.pointer) {
-                    left = (e.pointer.x / zoom).toExact(0);
-                    top = (e.pointer.y / zoom).toExact(0);
+                if (e.viewportPoint) {
+                    left = (e.viewportPoint.x / zoom).toExact(0);
+                    top = (e.viewportPoint.y / zoom).toExact(0);
                 } else {
                     left = 0;
                     top = 0;
@@ -2174,7 +2178,7 @@ export class EOImageEditor extends HTMLElement {
         fc.on('mouse:dblclick', () => {
             if (
                 this.activeObject?.type === 'rect' &&
-                this.activeObject.name === 'crop'
+                Reflect.get(this.activeObject, 'name') === 'crop'
             ) {
                 this.doAction('crop');
             } else if (this.activeObject == null) {

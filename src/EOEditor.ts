@@ -359,10 +359,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     /**
      * Buttons
      */
-    readonly buttons = {} as Record<
-        EOEditorCommandKey,
-        HTMLButtonElement | undefined
-    >;
+    readonly buttons: Record<string, HTMLButtonElement | undefined> = {};
 
     /**
      * Image editor
