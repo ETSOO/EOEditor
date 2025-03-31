@@ -2,6 +2,13 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
+//"glob": "^11.0.1",
+//entry: glob.sync("./src/**/*[^.d].{ts,tsx}").reduce((acc, file) => {
+//      file = file.replace(/\\/g, "/");
+//      acc[file.replace(/^src\//, "").replace(/.tsx?$/, "")] = "./" + file;
+//      return acc;
+//    }, {})
+
 module.exports = {
   entry: "./src/EOEditor.ts",
   devtool: "inline-source-map",

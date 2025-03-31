@@ -40,7 +40,7 @@ jobs:
       - run: npm run build
 
       # Build the package
-      - run: npm run tsc
+      - run: npm run release
 
       # Publish to npm
       # For scoped package, make it public for free service
