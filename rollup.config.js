@@ -35,7 +35,7 @@ const configCjs = {
   }],
   external: external,
   plugins: [
-    typescript(),
+    typescript({declaration: true, declarationDir: "lib/cjs"}),
     postcss({
       extensions: [".css"]
     }),
