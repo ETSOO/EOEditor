@@ -62,17 +62,20 @@ export type EOEditorLabelLanguage = {
   yes: string;
 };
 
-const zhHans = DomUtils.zhHans<EOEditorLabelLanguage>(
-  () => import("./../i18n/zh-Hans.json")
-);
+const zhHans = DomUtils.zhHans<EOEditorLabelLanguage>(async () => {
+  const labels = await import("./../i18n/zh-Hans.json");
+  return labels.default ?? labels;
+});
 
-const zhHant = DomUtils.zhHant<EOEditorLabelLanguage>(
-  () => import("./../i18n/zh-Hant.json")
-);
+const zhHant = DomUtils.zhHans<EOEditorLabelLanguage>(async () => {
+  const labels = await import("./../i18n/zh-Hant.json");
+  return labels.default ?? labels;
+});
 
-const en = DomUtils.en<EOEditorLabelLanguage>(
-  () => import("./../i18n/en.json")
-);
+const en = DomUtils.zhHans<EOEditorLabelLanguage>(async () => {
+  const labels = await import("./../i18n/en.json");
+  return labels.default ?? labels;
+});
 
 /**
  * EOEditor get labels

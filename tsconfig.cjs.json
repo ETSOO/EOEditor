@@ -2,11 +2,11 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "outDir": "./lib/mjs",
+    "outDir": "./lib/cjs",
     "sourceMap": false,
     "declaration": true,
     "emitDeclarationOnly": true,

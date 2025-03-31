@@ -1,15 +1,28 @@
 {
   "name": "@etsoo/editor",
-  "version": "1.0.47",
+  "version": "1.0.48",
   "description": "ETSOO Free WYSIWYG HTML Editor",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "lib/cjs/index.js",
+  "module": "lib/mjs/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/mjs/index.d.ts",
+      "import": "./lib/mjs/index.js",
+      "require": "./lib/cjs/index.js"
+    },
+    "./components": {
+      "types": "./lib/mjs/components/index.d.ts",
+      "import": "./lib/mjs/components/index.js",
+      "require": "./lib/cjs/components/index.js"
+    }
+  },
   "sideEffects": false,
   "scripts": {
     "start": "webpack serve",
     "build": "webpack --mode production --no-devtool",
     "webpack": "webpack",
-    "tsc": "tsc && copyfiles -u 1 ./src/*.css ./src/components/*.css ./lib/ && echo 'CSS files copied'",
+    "tsc": "tsc -p tsconfig.json && tsc -p tsconfig.cjs.json && webpack --config webpack.config.build.js --no-devtool",
+    "copy": "copyfiles -u 1 ./src/*.css ./src/components/*.css ./lib/ && echo 'CSS files copied'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -48,7 +61,6 @@
     "@babel/preset-typescript": "^7.27.0",
     "@types/pica": "^9.0.5",
     "babel-loader": "^10.0.0",
-    "copyfiles": "^2.4.1",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "terser-webpack-plugin": "^5.3.14",

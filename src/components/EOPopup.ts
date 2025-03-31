@@ -16,19 +16,7 @@ export class EOPopup extends HTMLElement {
     super();
 
     const template = document.createElement("template");
-    template.innerHTML = `
-            <style>
-                :host {
-                    position: absolute;
-                    background-color: #fff;
-                    border-radius: 4px;
-                    box-shadow: 0 2px 6px 2px rgba(60, 64, 67, 0.15);
-                    z-index: 990;
-                    user-select: none;
-                }
-            </style>
-            <slot></slot>
-        `;
+    template.innerHTML = `<style>:host { position: absolute; background-color: #fff; border-radius: 4px; box-shadow: 0 2px 6px 2px rgba(60, 64, 67, 0.15); z-index: 990; user-select: none;}</style><slot></slot>`;
 
     const shadowRoot = this.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content);
