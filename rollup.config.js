@@ -18,7 +18,10 @@ const configMjs = {
   plugins: [
     typescript({declaration: true, declarationDir: "lib/mjs"}),
     postcss({
-      extensions: [".css"]
+      config: false,
+      extensions: [".css"],
+      inject: false,
+      minimize: true
     }),
     json()
   ]
@@ -37,7 +40,10 @@ const configCjs = {
   plugins: [
     typescript({declaration: true, declarationDir: "lib/cjs"}),
     postcss({
-      extensions: [".css"]
+      config: false,
+      extensions: [".css"],
+      inject: false,
+      minimize: true
     }),
     json()
   ]
