@@ -63,12 +63,12 @@ const zhHans = DomUtils.zhHans<EOImageEditorLabelLanguage>(async () => {
   return labels.default ?? labels;
 });
 
-const zhHant = DomUtils.zhHans<EOImageEditorLabelLanguage>(async () => {
+const zhHant = DomUtils.zhHant<EOImageEditorLabelLanguage>(async () => {
   const labels = await import("./i18n/zh-Hant.json");
   return labels.default ?? labels;
 });
 
-const en = DomUtils.zhHans<EOImageEditorLabelLanguage>(async () => {
+const en = DomUtils.en<EOImageEditorLabelLanguage>(async () => {
   const labels = await import("./i18n/en.json");
   return labels.default ?? labels;
 });

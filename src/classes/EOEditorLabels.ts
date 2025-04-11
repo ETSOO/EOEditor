@@ -67,12 +67,12 @@ const zhHans = DomUtils.zhHans<EOEditorLabelLanguage>(async () => {
   return labels.default ?? labels;
 });
 
-const zhHant = DomUtils.zhHans<EOEditorLabelLanguage>(async () => {
+const zhHant = DomUtils.zhHant<EOEditorLabelLanguage>(async () => {
   const labels = await import("./../i18n/zh-Hant.json");
   return labels.default ?? labels;
 });
 
-const en = DomUtils.zhHans<EOEditorLabelLanguage>(async () => {
+const en = DomUtils.en<EOEditorLabelLanguage>(async () => {
   const labels = await import("./../i18n/en.json");
   return labels.default ?? labels;
 });

@@ -16,7 +16,7 @@ export class EOPopup extends HTMLElement {
     super();
 
     const template = document.createElement("template");
-    template.innerHTML = `<style>:host { position: absolute; background-color: #fff; border-radius: 4px; box-shadow: 0 2px 6px 2px rgba(60, 64, 67, 0.15); z-index: 990; user-select: none;}</style><slot></slot>`;
+    template.innerHTML = `<style>:host { position: fixed; background-color: #fff; border-radius: 4px; box-shadow: 0 2px 6px 2px rgba(60, 64, 67, 0.15); z-index: 990; user-select: none;}</style><slot></slot>`;
 
     const shadowRoot = this.attachShadow({ mode: "open" });
     shadowRoot.appendChild(template.content);
@@ -25,10 +25,16 @@ export class EOPopup extends HTMLElement {
   }
 
   private updatePos(location?: DOMRect, insideIFrame: boolean = false) {
-    const { clientWidth: maxWidth, clientHeight: maxHeight } =
+    let { clientWidth: maxWidth, clientHeight: maxHeight } =
       window.document.body;
 
-    const prect: DOMRect = this.getBoundingClientRect();
+    let prect: DOMRect = this.getBoundingClientRect();
+
+    if (this.offsetParent && this.offsetParent.nodeName !== "BODY") {
+      const prect2: DOMRect = this.offsetParent.getBoundingClientRect();
+      maxWidth = prect2.width;
+      maxHeight = prect2.height;
+    }
 
     const rect =
       location ??

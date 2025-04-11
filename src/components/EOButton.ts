@@ -47,47 +47,47 @@ export class EOButton extends HTMLButtonElement {
       document.head.insertAdjacentHTML(
         "beforeend",
         `<style>
-                    #EOEditorTooltipDiv {
-                        position: absolute;
-                        font-size: 12px;
-                        padding: 4px 8px;
-                        background: #000;
-                        color: #fff;
-                        z-index: 1000;
-                        white-space: nowrap;
-                        user-select: none;
-                    }
-                    #EOEditorTooltipDiv:after {
-                        content: '';
-                        position: absolute;
-                        margin-left: calc(-50% + 4px);
-                        margin-top: -12px;
-                        z-index: 1000;
-                        color: #fff;
-                        border: 4px solid transparent;	
-                        border-bottom: 4px solid #000;
-                    }
-                    #EOEditorTooltipDiv.tooltip-start:after {
-                        content: '';
-                        position: absolute;
-                        margin-left: calc(-100% + 19px);
-                        margin-top: -12px;
-                        z-index: 1000;
-                        color: #fff;
-                        border: 4px solid transparent;	
-                        border-bottom: 4px solid #000;
-                    }
-                    #EOEditorTooltipDiv.tooltip-end:after {
-                        content: '';
-                        position: absolute;
-                        margin-left: -11px;
-                        margin-top: -12px;
-                        z-index: 1000;
-                        color: #fff;
-                        border: 4px solid transparent;	
-                        border-bottom: 4px solid #000;
-                    }
-                </style>`
+            #EOEditorTooltipDiv {
+                position: absolute;
+                font-size: 12px;
+                padding: 4px 8px;
+                background: #000;
+                color: #fff;
+                z-index: 1000;
+                white-space: nowrap;
+                user-select: none;
+            }
+            #EOEditorTooltipDiv:after {
+                content: '';
+                position: absolute;
+                margin-left: calc(-50% + 4px);
+                margin-top: -12px;
+                z-index: 1000;
+                color: #fff;
+                border: 4px solid transparent;	
+                border-bottom: 4px solid #000;
+            }
+            #EOEditorTooltipDiv.tooltip-start:after {
+                content: '';
+                position: absolute;
+                margin-left: calc(-100% + 19px);
+                margin-top: -12px;
+                z-index: 1000;
+                color: #fff;
+                border: 4px solid transparent;	
+                border-bottom: 4px solid #000;
+            }
+            #EOEditorTooltipDiv.tooltip-end:after {
+                content: '';
+                position: absolute;
+                margin-left: -11px;
+                margin-top: -12px;
+                z-index: 1000;
+                color: #fff;
+                border: 4px solid transparent;	
+                border-bottom: 4px solid #000;
+            }
+        </style>`
       );
 
       tooltipDiv = document.createElement("div");
@@ -124,4 +124,5 @@ export class EOButton extends HTMLButtonElement {
   }
 }
 
-customElements.define("eo-button", EOButton, { extends: "button" });
+customElements.get("eo-button") ||
+  customElements.define("eo-button", EOButton, { extends: "button" });

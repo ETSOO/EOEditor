@@ -19,7 +19,13 @@ import {
   EOEditorCharacterType
 } from "./classes/EOEditorCharacters";
 import { EOImageEditor } from "./components/EOImageEditor";
-import { DomUtils, EColor, ExtendUtils, Utils } from "@etsoo/shared";
+import {
+  DomUtils,
+  EColor,
+  ExtendUtils,
+  NumberUtils,
+  Utils
+} from "@etsoo/shared";
 import { VirtualTable } from "./classes/VirtualTable";
 import { EOPalette } from "./components/EOPalette";
 import styles from "./EOEditor.css";
@@ -244,7 +250,28 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    */
   get content() {
     if (this.hidden) return this.getAttribute("content");
-    return this.editorWindow.document.body.innerHTML;
+    let content = this.editorWindow.document.body.innerHTML;
+
+    // Remove all "<p><br></p>"
+    content = content.replace(/<p><br\/?><\/p>/g, "");
+
+    // Remove empty style property inside tags
+    content = content.replace(/(<[^<>]+)\s+style\s*=\s*(['"])\2/g, "$1");
+
+    // Suplement "<p>" for the first one
+    const first = content.search(
+      /<(p|div|h[1-6]|table|section|header|footer|article|nav|main|form|ul|ol|fieldset|blockquote|pre)[^>]*>/
+    );
+    if (first == -1) {
+      content = `<p>${content}</p>`;
+    } else if (first > 0) {
+      const prev = content.substring(0, first);
+      const next = content.substring(first);
+      content = `<p>${prev}</p>${next}`;
+    }
+
+    // Return
+    return content;
   }
   set content(value: string | null | undefined) {
     if (this.hidden) {
@@ -586,12 +613,16 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
   private setWidth() {
     const width = this.width;
-    if (width) this.style.setProperty("--width", width);
+    if (width) {
+      this.style.setProperty("--width", width);
+    }
   }
 
   private setHeight() {
     const height = this.height;
-    if (height) this.style.setProperty("--height", height);
+    if (height) {
+      this.style.setProperty("--height", height);
+    }
   }
 
   private setColor() {
@@ -2506,7 +2537,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
             <div class="grid-title">${labels.link}</div>
                 <label for="url" class="self">${
                   labels.linkURL
-                }: </label><textarea id="url" maxlength="255" rows="3" style="width:200px;" class="span3">${
+                }: </label><textarea placeholder="https://etsoo.com" id="url" maxlength="255" rows="3" style="width:200px;" class="span3">${
       a?.href ?? ""
     }</textarea>
                 <div></div>
@@ -3210,4 +3241,4 @@ customElements.get("eo-button") ||
   customElements.define("eo-button", EOButton, { extends: "button" });
 customElements.get("eo-image-editor") ||
   customElements.define("eo-image-editor", EOImageEditor);
-customElements.define("eo-editor", EOEditor);
+customElements.get("eo-editor") || customElements.define("eo-editor", EOEditor);
