@@ -313,7 +313,8 @@ export class EOImageEditor extends HTMLElement {
     p.addEventListener("touchstart", touchHandler, { passive: true });
     p.addEventListener("touchmove", touchHandler, { passive: true });
 
-    document.fonts.ready.then((value) => {
+    // document.fonts maybe not available in some browsers, like jsdom
+    document.fonts?.ready.then((value) => {
       value.forEach((v) => {
         if (!this.fonts.includes(v.family)) this.fonts.push(v.family);
       });

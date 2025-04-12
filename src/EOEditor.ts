@@ -19,13 +19,7 @@ import {
   EOEditorCharacterType
 } from "./classes/EOEditorCharacters";
 import { EOImageEditor } from "./components/EOImageEditor";
-import {
-  DomUtils,
-  EColor,
-  ExtendUtils,
-  NumberUtils,
-  Utils
-} from "@etsoo/shared";
+import { DomUtils, EColor, ExtendUtils, Utils } from "@etsoo/shared";
 import { VirtualTable } from "./classes/VirtualTable";
 import { EOPalette } from "./components/EOPalette";
 import styles from "./EOEditor.css";
