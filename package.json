@@ -1,6 +1,6 @@
 {
   "name": "@etsoo/editor",
-  "version": "1.0.55",
+  "version": "1.0.56",
   "description": "ETSOO Free WYSIWYG HTML Editor",
   "main": "lib/cjs/index.js",
   "module": "lib/mjs/index.js",

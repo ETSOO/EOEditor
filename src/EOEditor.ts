@@ -80,16 +80,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    * Observed attributes
    */
   static get observedAttributes() {
-    return [
-      "name",
-      "commands",
-      "width",
-      "height",
-      "color",
-      "activeColor",
-      "content",
-      "value"
-    ];
+    return ["name", "commands", "width", "height", "color", "activeColor"];
   }
 
   /**
@@ -239,11 +230,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     else this.removeAttribute("commands");
   }
 
+  _content: string | null | undefined;
+
   /**
    * Get or set editor's content
    */
   get content() {
-    if (this.hidden) return this.getAttribute("content");
+    if (this.hidden) return this._content;
     let content = this.editorWindow.document.body.innerHTML.trim();
 
     if (content === "") return undefined;
@@ -277,9 +270,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
   }
   set content(value: string | null | undefined) {
     if (this.hidden) {
-      if (value) this.setAttribute("content", value);
-      else this.removeAttribute("content");
-    } else this.setContent(value);
+      this._content = value;
+    } else {
+      this.setContent(value);
+    }
   }
 
   /**
@@ -710,7 +704,15 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     this._editorWindow = win;
     const doc = win.document;
 
-    doc.body.innerHTML = (this.getBackup() || this.content) ?? this.innerHTML;
+    if (this.innerHTML) {
+      this.content = this.innerHTML;
+      this.innerHTML = ""; // Clear the textContent to avoid duplication
+    } else {
+      this.content = this.getBackup();
+    }
+
+    doc.body.innerHTML = this.content ?? "";
+    this.content = undefined; // Clear the content
 
     if (doc.body.contentEditable !== "true") {
       // Default styles
@@ -1152,10 +1154,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         break;
       case "activeColor":
         this.setActiveColor();
-        break;
-      case "content":
-      case "value":
-        this.setContent(newVal);
         break;
     }
   }
