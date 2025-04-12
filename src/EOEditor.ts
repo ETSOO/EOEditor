@@ -250,13 +250,21 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    */
   get content() {
     if (this.hidden) return this.getAttribute("content");
-    let content = this.editorWindow.document.body.innerHTML;
+    let content = this.editorWindow.document.body.innerHTML.trim();
+
+    if (content === "") return undefined;
+
+    // Remove empty style property inside tags
+    content = content.replace(/(<[^<>]+)\s+style\s*=\s*(['"])\2/g, "$1");
 
     // Remove all "<p><br></p>"
     content = content.replace(/<p><br\/?><\/p>/g, "");
 
-    // Remove empty style property inside tags
-    content = content.replace(/(<[^<>]+)\s+style\s*=\s*(['"])\2/g, "$1");
+    // Remove empty <p> tags
+    content = content.replace(/<p><\/p>/g, "").trim();
+
+    // Return empty string if no content
+    if (content === "") return undefined;
 
     // Suplement "<p>" for the first one
     const first = content.search(

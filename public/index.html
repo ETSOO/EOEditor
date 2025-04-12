@@ -39,10 +39,12 @@
         padding: 10px;
         background-color: #3f51b5;
         color: white;
-        cursor: move;
         font-weight: bold;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
       .dialog-body {
@@ -53,7 +55,10 @@
   </head>
   <body>
     <dialog id="myDialog">
-      <div class="dialog-header" id="dialogTitle">Draggable Title</div>
+      <div class="dialog-header">
+        <div id="dialogTitle">Editor in Dialog</div>
+        <button onclick="document.getElementById('myDialog').close()">X</button>
+      </div>
       <div class="dialog-body">
         <eo-editor
           name="dialog"
@@ -61,44 +66,11 @@
           width="auto"
           height="280px"
         ></eo-editor>
-        <button onclick="document.getElementById('myDialog').close()">
-          Close
-        </button>
       </div>
     </dialog>
     <button onclick="document.getElementById('myDialog').showModal()">
       Open Dialog
     </button>
-    <script>
-      const dialog = document.getElementById("myDialog");
-      const titleBar = document.getElementById("dialogTitle");
-
-      let isDragging = false;
-      let offsetX, offsetY;
-
-      function mousedown(e) {
-        isDragging = true;
-        const rect = dialog.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
-
-        document.addEventListener("mousemove", mousemove);
-        document.addEventListener("mouseup", mouseup);
-      }
-      function mousemove(e) {
-        if (isDragging) {
-          dialog.style.left = `${e.clientX - offsetX}px`;
-          dialog.style.top = `${e.clientY - offsetY}px`;
-        }
-      }
-      function mouseup() {
-        isDragging = false;
-        document.removeEventListener("mousemove", mousemove);
-        document.removeEventListener("mouseup", mouseup);
-      }
-
-      titleBar.addEventListener("mousedown", mousedown);
-    </script>
     <h1>EOEditor 2022</h1>
     <form onsubmit="console.log(editor.value); event.preventDefault();">
       <eo-editor
@@ -154,7 +126,7 @@
       </div>
     </form>
     <script>
-      const editor = document.querySelector("eo-editor");
+      const editor = document.querySelector("eo-editor[name='description']");
       editor.addEventListener("backup", (event) => {
         //console.log('backup', event.detail);
       });
