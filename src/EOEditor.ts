@@ -704,8 +704,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     this._editorWindow = win;
     const doc = win.document;
 
-    if (this.innerHTML) {
-      this.content = this.innerHTML;
+    const html = this.innerHTML.trim();
+    if (html) {
+      if (
+        Utils.hasHtmlEntity(this.innerHTML) &&
+        !Utils.hasHtmlTag(this.innerHTML)
+      ) {
+        this.content = this.textContent;
+      } else {
+        this.content = this.innerHTML;
+      }
+
       this.innerHTML = ""; // Clear the textContent to avoid duplication
     } else {
       this.content = this.getBackup();

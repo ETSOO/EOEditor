@@ -60,12 +60,10 @@
         <button onclick="document.getElementById('myDialog').close()">X</button>
       </div>
       <div class="dialog-body">
-        <eo-editor
-          name="dialog"
-          language="zh-Hans"
-          width="auto"
-          height="280px"
-        ></eo-editor>
+        <eo-editor name="dialog" language="zh-Hans" width="auto" height="280px"
+          >&#x3C;p&#x3E;Hello, world! This is
+          &#x3C;b&#x3E;BOLD&#x3C;/b&#x3E;.&#x3C;/p&#x3E;</eo-editor
+        >
       </div>
     </dialog>
     <button onclick="document.getElementById('myDialog').showModal()">
