@@ -1,6 +1,6 @@
 {
   "name": "@etsoo/editor",
-  "version": "1.0.57",
+  "version": "1.0.58",
   "description": "ETSOO Free WYSIWYG HTML Editor",
   "main": "lib/cjs/index.js",
   "module": "lib/mjs/index.js",
@@ -60,17 +60,17 @@
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
-    "rollup": "^4.39.0",
+    "rollup": "^4.40.0",
     "rollup-plugin-postcss": "^4.0.2",
     "terser-webpack-plugin": "^5.3.14",
     "typescript": "^5.8.3",
-    "webpack": "^5.99.5",
+    "webpack": "^5.99.6",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.1"
   },
   "dependencies": {
-    "@etsoo/shared": "^1.2.68",
-    "fabric": "^6.6.2",
+    "@etsoo/shared": "^1.2.69",
+    "fabric": "^6.6.4",
     "pica": "^9.0.1"
   }
 }
