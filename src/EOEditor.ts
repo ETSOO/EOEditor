@@ -111,6 +111,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    */
   static readonly LatestCharactersKey = "EOEditor-Latest-Characters";
 
+  private _backupInitialized: boolean = false;
+  /**
+   * Backup initialized
+   */
+  get backupInitialized() {
+    return this._backupInitialized;
+  }
+
   /**
    * Buttons
    */
@@ -708,6 +716,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     let html = this.getBackup();
     if (html) {
       this.content = html;
+      this._backupInitialized = true;
     } else {
       html = this.innerHTML.trim();
       if (html) {

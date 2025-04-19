@@ -31,6 +31,11 @@ export interface IEOEditorClickedButton {
  */
 export interface IEOEditor {
   /**
+   * Is the editor content from backup
+   */
+  get backupInitialized(): boolean;
+
+  /**
    * All first-level buttons
    */
   get buttons(): Record<EOEditorCommandKey, HTMLButtonElement | undefined>;
