@@ -181,6 +181,15 @@ export interface IEOEditor {
   getBackup(): string | null;
 
   /**
+   * Get current element inside which is selected or focused
+   * @param tester Tester function or class name
+   * @returns Element
+   */
+  getCurrentElement(
+    tester: string | ((input: HTMLElement) => boolean)
+  ): HTMLElement | null;
+
+  /**
    * Get deepest node
    * @param node Node
    * @returns Deepest node

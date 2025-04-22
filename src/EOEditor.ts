@@ -1269,10 +1269,34 @@ export class EOEditor extends HTMLElement implements IEOEditor {
   }
 
   /**
+   * Get current element
+   * @param tester Tester function or class name
+   * @returns Element
+   */
+  getCurrentElement(
+    tester: string | ((input: HTMLElement) => boolean)
+  ): HTMLElement | null {
+    let input = this.getFirstElement();
+
+    while (input != null) {
+      const test =
+        typeof tester === "string"
+          ? input.classList.contains(tester)
+          : tester(input);
+
+      if (test) return input;
+
+      input = input.parentElement;
+    }
+
+    return null;
+  }
+
+  /**
    * Get first element
    * @param selection Selection
    */
-  getFirstElement(selection: Selection | null): HTMLElement | null;
+  getFirstElement(selection?: Selection | null): HTMLElement | null;
 
   /**
    * Get first element
@@ -1285,7 +1309,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    * @param input Input selection or range
    * @returns Element
    */
-  getFirstElement(input: Selection | Range | null) {
+  getFirstElement(input: Selection | Range | null | undefined) {
     // Null case
     if (input == null) input = this.getSelection();
     if (input == null) return;
@@ -1923,7 +1947,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
           // Current element
           let element: HTMLElement | null =
-            this.getFirstElement(null) ?? this.editorWindow.document.body;
+            this.getFirstElement() ?? this.editorWindow.document.body;
           while (element) {
             const tagName = element.tagName;
             if (textBoxNextTags.includes(tagName)) {
@@ -2426,7 +2450,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
       const link = this.getFirstLink();
       if (link) return false;
       else if (key === "link") {
-        const element = this.getFirstElement(null);
+        const element = this.getFirstElement();
         if (element?.tagName === "IMG") return false;
       }
     }
@@ -2673,7 +2697,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
     for (const node of [
       range.commonAncestorContainer?.nextSibling as HTMLElement,
-      this.getFirstElement(null)
+      this.getFirstElement()
     ]) {
       if (node == null || node.classList == null) continue;
       if (this.removeLock(node)) return;
@@ -3150,7 +3174,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     }
 
     if (name === "textbox") {
-      this.popupTextbox();
+      // Is inside a textbox?
+      const textbox = this.getCurrentElement("eo-textbox") as HTMLDivElement;
+      this.popupTextbox(textbox);
       return true;
     }
 

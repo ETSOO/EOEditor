@@ -114,33 +114,34 @@ export const EOEditorEx = React.forwardRef<IEOEditor, EOEditorExProps>(
 
 ## Methods / 方法
 
-|            Name | Description                                 |
-| --------------: | ------------------------------------------- |
-|          backup | Backup editor content                       |
-|     clearBackup | Clear backup                                |
-|   createElement | Create element                              |
-|          delete | Delete selection                            |
-|       editImage | Edit image                                  |
-|  executeCommand | Execute command                             |
-|       getBackup | Get backup                                  |
-|  getDeepestNode | Get deepest node                            |
-| getFirstElement | Get first selection element                 |
-| getFirstElement | Get first range element                     |
-|    getFirstLink | Get first section outer link                |
-|   getFirstRange | Get first range                             |
-|  getOnlyElement | Get the only child element                  |
-|    getSelection | Get selection                               |
-|      insertHTML | Insert HTML text to current selection point |
-|     insertImage | Insert image                                |
-|     insertTable | Insert table                                |
-|     popupBlocks | Popup blocks                                |
-|     popupColors | Popup color palette                         |
-|    popupContent | Popup HTML content                          |
-|      popupIcons | Popup icons                                 |
-|      popupStyle | Popup styles                                |
-|    popupSymbols | Popup symbols                               |
-|       popupSubs | Popup subs                                  |
-|    restoreFocus | Restore focus to the editor iframe          |
-|    surroundNode | Let first range surround node               |
-| tableProperties | Table properties                            |
-|          unlink | Unlink                                      |
+|              Name | Description                                             |
+| ----------------: | ------------------------------------------------------- |
+|            backup | Backup editor content                                   |
+|       clearBackup | Clear backup                                            |
+|     createElement | Create element                                          |
+|            delete | Delete selection                                        |
+|         editImage | Edit image                                              |
+|    executeCommand | Execute command                                         |
+|         getBackup | Get backup                                              |
+| getCurrentElement | Get current element inside which is selected or focused |
+|    getDeepestNode | Get deepest node                                        |
+|   getFirstElement | Get first selection element                             |
+|   getFirstElement | Get first range element                                 |
+|      getFirstLink | Get first section outer link                            |
+|     getFirstRange | Get first range                                         |
+|    getOnlyElement | Get the only child element                              |
+|      getSelection | Get selection                                           |
+|        insertHTML | Insert HTML text to current selection point             |
+|       insertImage | Insert image                                            |
+|       insertTable | Insert table                                            |
+|       popupBlocks | Popup blocks                                            |
+|       popupColors | Popup color palette                                     |
+|      popupContent | Popup HTML content                                      |
+|        popupIcons | Popup icons                                             |
+|        popupStyle | Popup styles                                            |
+|      popupSymbols | Popup symbols                                           |
+|         popupSubs | Popup subs                                              |
+|      restoreFocus | Restore focus to the editor iframe                      |
+|      surroundNode | Let first range surround node                           |
+|   tableProperties | Table properties                                        |
+|            unlink | Unlink                                                  |
