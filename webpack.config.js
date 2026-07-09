@@ -24,10 +24,7 @@ module.exports = {
               ["@babel/preset-env", { modules: false, targets: "defaults" }],
               "@babel/preset-typescript"
             ],
-            plugins: [
-              "@babel/proposal-class-properties",
-              "@babel/proposal-object-rest-spread"
-            ]
+            plugins: []
           }
         }
       },

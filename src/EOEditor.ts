@@ -244,7 +244,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    * Get or set editor's content
    */
   get content() {
-    if (this.hidden) return this._content;
+    if (this.hidden || this.editorWindow == null) return this._content;
     let content = this.editorWindow.document.body.innerHTML.trim();
 
     if (content === "") return undefined;
@@ -277,7 +277,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     return content;
   }
   set content(value: string | null | undefined) {
-    if (this.hidden) {
+    if (this.hidden || this.editorWindow == null) {
       this._content = value;
     } else {
       this.setContent(value);
@@ -1694,22 +1694,22 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     return `
         <div class="span3 narrow">
             <input id="${nameTop}" placeholder="${sides[0]}" value="${getValue(
-      nameTop
-    )}"/>
+              nameTop
+            )}"/>
             <button title="${labels.sameValue}">
                 <svg width="16" height="16" viewBox="0 0 24 24" class="inline">${
                   EOEditorSVGs.arrayRight
                 }</svg>
             </button>
             <input id="${nameRight}" placeholder="${
-      sides[1]
-    }" value="${getValue(nameRight)}"/>
+              sides[1]
+            }" value="${getValue(nameRight)}"/>
             <input id="${nameBottom}" placeholder="${
-      sides[2]
-    }" value="${getValue(nameBottom)}"/>
+              sides[2]
+            }" value="${getValue(nameBottom)}"/>
             <input id="${nameLeft}" placeholder="${sides[3]}" value="${getValue(
-      nameLeft
-    )}"/>
+              nameLeft
+            )}"/>
         </div>
         `;
   }
@@ -2500,8 +2500,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 <label for="src" class="self">${
                   labels.linkURL
                 }: </label><textarea id="src" maxlength="255" rows="3" class="span3">${
-      element?.src ?? ""
-    }</textarea>
+                  element?.src ?? ""
+                }</textarea>
                 <label for="width">${labels.width}</label>
                 <input type="text" id="width" value="${
                   element?.width ?? "100%"
@@ -2513,7 +2513,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 <div></div>
                 <label>
                 <input name="allowfullscreen" type="checkbox"${
-                  element?.allowFullscreen ?? true ? " checked" : ""
+                  (element?.allowFullscreen ?? true) ? " checked" : ""
                 }/>${labels.allowfullscreen}
             </label>
             <label for="border">${labels.border}</label>
@@ -2581,14 +2581,14 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                 <label for="url" class="self">${
                   labels.linkURL
                 }: </label><textarea placeholder="https://etsoo.com" id="url" maxlength="255" rows="3" style="width:200px;" class="span3">${
-      a?.href ?? ""
-    }</textarea>
+                  a?.href ?? ""
+                }</textarea>
                 <div></div>
                 <div class="span3 flex2"><label><input name="target" type="checkbox" value="_blank"${
                   a?.target === "_blank" ? " checked" : ""
                 }/>${labels.linkTargetNew}</label>${
-      a == null ? "" : this.createIconButton("unlink")
-    }       </div>
+                  a == null ? "" : this.createIconButton("unlink")
+                }       </div>
                 <div class="full-width"><button class="full-width" name="apply">${
                   labels.apply
                 }</button></div>
@@ -2801,8 +2801,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     <input type="radio" name="way" value="0" checked/>${
                       labels.uploadFromComputer
                     }<svg width="16" height="16" viewBox="0 0 24 24" class="inline">${
-      EOEditorSVGs.upload
-    }</svg>
+                      EOEditorSVGs.upload
+                    }</svg>
                 </label>
                 <input id="imageFile" type="file" multiple accept="image/*" style="width: 200px; opacity: 0">
             </div>
@@ -2829,13 +2829,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
                     <button title="${
                       labels.delete
                     }" name="delete" disabled>${this.createSVG(
-      EOEditorCommands.delete.icon
-    )}</button>
+                      EOEditorCommands.delete.icon
+                    )}</button>
                     <button title="${
                       labels.edit
                     }" name="edit" disabled>${this.createSVG(
-      EOEditorSVGs.edit
-    )}</button>
+                      EOEditorSVGs.edit
+                    )}</button>
                 </div>
             </div>
             <div class="full-width"><button class="full-width" name="apply" disabled>${

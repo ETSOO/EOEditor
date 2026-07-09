@@ -36,13 +36,19 @@ function getColors(doc: Document) {
 }
 
 function getPointColor(event: MouseEvent) {
-  const ctx = (event.target as HTMLCanvasElement).getContext("2d")!;
+  const ctx = (event.target as HTMLCanvasElement).getContext("2d", {
+    willReadFrequently: true
+  });
+  if (!ctx) return "rgb(0, 0, 0)";
+
   const data = ctx.getImageData(event.offsetX, event.offsetY, 1, 1).data;
   return `rgb(${data.slice(0, 3).join(", ")})`;
 }
 
 function createColorStrip(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return;
+
   const { width, height } = canvas;
 
   ctx.rect(0, 0, width, height);
@@ -247,7 +253,9 @@ export class EOPalette extends EOPopup {
 
     const colorBlock =
       this.querySelector<HTMLCanvasElement>("canvas#color-block")!;
-    const ctx = colorBlock.getContext("2d")!;
+    const ctx = colorBlock.getContext("2d", {
+      willReadFrequently: true
+    })!;
 
     const previewColor = (event: MouseEvent) => {
       const color = getPointColor(event);
