@@ -404,6 +404,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
   }
 
   private getBackupName() {
+    if (!this.backupKey) return undefined;
     return `${EOEditor.BackupKey}-${this.name}-${this.backupKey}`;
   }
 
@@ -426,8 +427,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
   private backupAction() {
     const content = this.content;
     if (content) {
-      window.localStorage.setItem(this.getBackupName(), content);
-      this.dispatchEvent(new CustomEvent("backup", { detail: content }));
+      const name = this.getBackupName();
+      if (name) {
+        window.localStorage.setItem(name, content);
+        this.dispatchEvent(new CustomEvent("backup", { detail: content }));
+      }
     }
   }
 
@@ -435,14 +439,17 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    * Clear backup
    */
   clearBackup() {
-    window.localStorage.removeItem(this.getBackupName());
+    const name = this.getBackupName();
+    if (name) window.localStorage.removeItem(name);
   }
 
   /**
    * Get backup
    */
   getBackup() {
-    return window.localStorage.getItem(this.getBackupName());
+    const name = this.getBackupName();
+    if (name) return window.localStorage.getItem(name);
+    else return null;
   }
 
   private setCommands() {
@@ -1061,6 +1068,8 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
       this.restoreFocus();
     }
+
+    this.dispatchEvent(new CustomEvent("editorready"));
   }
 
   private testMergeButton(table: HTMLTableElement | Range) {
