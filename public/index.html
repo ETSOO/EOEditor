@@ -136,6 +136,11 @@
       editor.addEventListener("editorready", (event) => {
         console.log("editorready");
       });
+
+      const dialogEditor = document.querySelector("eo-editor[name='dialog']");
+      dialogEditor.addEventListener("editorready", (event) => {
+        console.log("dialog editorready");
+      });
     </script>
   </body>
 </html>

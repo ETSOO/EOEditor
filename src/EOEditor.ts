@@ -35,7 +35,7 @@ template.innerHTML = `
     <eo-image-editor></eo-image-editor>
     <div class="container">
         <div class="toolbar"></div>
-        <div class="edit-area"><iframe></iframe><textarea></textarea></div>
+        <div class="edit-area"><iframe></iframe><textarea name="content"></textarea></div>
     </div>
 `;
 
@@ -244,7 +244,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
    * Get or set editor's content
    */
   get content() {
-    if (this.hidden || this.editorWindow == null) return this._content;
+    if (this.editorWindow == null) return this._content;
     let content = this.editorWindow.document.body.innerHTML.trim();
 
     if (content === "") return undefined;
@@ -277,7 +277,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     return content;
   }
   set content(value: string | null | undefined) {
-    if (this.hidden || this.editorWindow == null) {
+    if (this.editorWindow == null) {
       this._content = value;
     } else {
       this.setContent(value);
@@ -677,7 +677,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
     // Hide the border when focus
     // this.style.outline = '0px solid transparent';
-    this.hidden = true;
 
     // Update attributes
     this.setWidth();
@@ -702,7 +701,10 @@ export class EOEditor extends HTMLElement implements IEOEditor {
       if (document.readyState !== "complete") return false;
       const win = this.editorFrame.contentWindow;
       if (win == null) {
-        this.editorFrame.addEventListener("load", () => init(), { once: true });
+        setTimeout(() => {
+          console.log("Win", this.editorFrame.contentWindow);
+        }, 500);
+        console.log(`EOEditor: editor ${this.name} iframe window is null`);
       } else {
         this.initContent(win);
       }
@@ -710,7 +712,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     };
     if (!init()) {
       document.addEventListener("readystatechange", () => {
-        if (document.readyState === "complete") init();
+        init();
       });
     }
   }
@@ -720,9 +722,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     this.palette.hide();
   }
 
-  private initContent(win: Window | null) {
-    if (win == null) return;
-
+  private initContent(win: Window) {
     this._editorWindow = win;
     const doc = win.document;
 
@@ -1070,9 +1070,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
         this.backup(-1);
       });
 
-      // Display
-      this.hidden = false;
-
       this.restoreFocus();
     }
 
@@ -1208,7 +1205,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
       icon
     )}${
       name === "foreColor" || name === "backColor"
-        ? '<svg width="18" height="4" viewBox="0 0 18 4" class="color-indicator"><rect x="0" y="0" width="18" height="4" /></svg>'
+        ? '<svg width="18" height="4" viewBox="0 0 18 4" class="color-indicator" fill="' +
+          (name === "backColor" ? "none" : "black") +
+          '"><rect x="0" y="0" width="18" height="4" /></svg>'
         : ""
     }</button>`;
   }
@@ -3205,7 +3204,11 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
     if (name === "backColor" || name === "foreColor") {
       this.popupColors(this.getFillColor(name), (color) => {
-        doc.execCommand(name, false, color);
+        if (name === "foreColor" && (color === "transparent" || !color)) {
+          doc.execCommand("removeFormat", false, name);
+        } else {
+          doc.execCommand(name, false, color);
+        }
 
         this.restoreFocus();
         this.getFirstRange()?.collapse();
