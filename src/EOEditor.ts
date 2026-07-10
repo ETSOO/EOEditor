@@ -704,13 +704,13 @@ export class EOEditor extends HTMLElement implements IEOEditor {
       if (win == null) {
         this.editorFrame.addEventListener("load", () => init(), { once: true });
       } else {
-        this.initContent(this.editorFrame.contentWindow);
+        this.initContent(win);
       }
       return true;
     };
     if (!init()) {
-      document.addEventListener("readystatechange", () => init(), {
-        once: true
+      document.addEventListener("readystatechange", () => {
+        if (document.readyState === "complete") init();
       });
     }
   }
