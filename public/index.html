@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -70,7 +70,12 @@
       Open Dialog
     </button>
     <h1>EOEditor 2022</h1>
-    <form onsubmit="console.log(editor.value); event.preventDefault();">
+    <form
+      onsubmit="
+        console.log(editor.value);
+        event.preventDefault();
+      "
+    >
       <eo-editor
         name="description"
         language="zh-Hans"
@@ -126,7 +131,10 @@
     <script>
       const editor = document.querySelector("eo-editor[name='description']");
       editor.addEventListener("backup", (event) => {
-        //console.log('backup', event.detail);
+        console.log("backup");
+      });
+      editor.addEventListener("editorready", (event) => {
+        console.log("editorready");
       });
     </script>
   </body>
