@@ -701,10 +701,7 @@ export class EOEditor extends HTMLElement implements IEOEditor {
       if (document.readyState !== "complete") return false;
       const win = this.editorFrame.contentWindow;
       if (win == null) {
-        setTimeout(() => {
-          console.log("Win", this.editorFrame.contentWindow);
-        }, 500);
-        console.log(`EOEditor: editor ${this.name} iframe window is null`);
+        throw new Error(`EOEditor: editor ${this.name} iframe window is null`);
       } else {
         this.initContent(win);
       }
@@ -1072,8 +1069,6 @@ export class EOEditor extends HTMLElement implements IEOEditor {
 
       this.restoreFocus();
     }
-
-    this.dispatchEvent(new CustomEvent("editorready"));
   }
 
   private testMergeButton(table: HTMLTableElement | Range) {
