@@ -53,8 +53,7 @@ export namespace ImageUtils {
   export async function resize(
     // For Blob, createImageBitmap(blob)
     source: HTMLCanvasElement | HTMLImageElement | ImageBitmap,
-    size: Size,
-    quality?: 0 | 1 | 2 | 3
+    size: Size
   ) {
     // Dynamic load pica
     const pica = (await import("pica")).default;
@@ -67,7 +66,7 @@ export namespace ImageUtils {
     // pica instance
     const pi = pica();
     return await pi.resize(source, to, {
-      quality,
+      filter: "lanczos3",
       unsharpAmount: 160,
       unsharpRadius: 0.6,
       unsharpThreshold: 1

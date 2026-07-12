@@ -169,7 +169,7 @@ export class EOImageEditor extends HTMLElement {
   constructor() {
     super();
 
-    this.hidden = true;
+    this.style.visibility = "hidden";
 
     const xs = window.innerWidth < 480;
     this.xs = xs;
@@ -354,7 +354,6 @@ export class EOImageEditor extends HTMLElement {
       }
     });
 
-    this.hidden = true;
     this.createCommands();
 
     if (this.panelColor) {
@@ -366,7 +365,7 @@ export class EOImageEditor extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.hidden = true;
+    this.style.visibility = "hidden";
     window.removeEventListener("resize", this.onResize.bind(this));
     window.removeEventListener("keydown", this.onKeypress.bind(this));
   }
@@ -562,6 +561,7 @@ export class EOImageEditor extends HTMLElement {
                   ml: false, // middle left
                   mr: false // middle right
                 });
+                image.positionByLeftTop(new fabric.Point(0, 0));
                 this.fc?.add(image);
               },
               undo: () => this.fc?.remove(image)
@@ -685,7 +685,6 @@ export class EOImageEditor extends HTMLElement {
         if (o?.type === "rect" && Reflect.get(o, "name") === "crop") {
           // Size
           const { width, height, left = 0, top = 0 } = o;
-          if (width == null || height == null) return;
 
           // Cache sizes
           const sizes = [
@@ -699,8 +698,8 @@ export class EOImageEditor extends HTMLElement {
             title: l.crop,
             action: () => {
               const zoom = fc.getZoom();
-              const scaleX = o.scaleX ?? 1;
-              const scaleY = o.scaleY ?? 1;
+              const scaleX = o.scaleX;
+              const scaleY = o.scaleY;
 
               // Take the rect border into account
               // Otherwise the saved image will have the mask borders
@@ -714,12 +713,13 @@ export class EOImageEditor extends HTMLElement {
               fc.clipPath = o;
 
               // Size
-              fc.setWidth(nw);
-              fc.setHeight(nh);
-              fc.absolutePan(new fabric.Point(nl, nt));
+              fc.setDimensions({ width: nw, height: nh });
 
-              this.originalWidth = width * scaleX;
-              this.originalHeight = height * scaleY;
+              const p = new fabric.Point(nl - nw / 2, nt - nh / 2);
+              fc.absolutePan(p);
+
+              this.originalWidth = nw;
+              this.originalHeight = nh;
 
               this.updateSize();
 
@@ -729,8 +729,7 @@ export class EOImageEditor extends HTMLElement {
               fc.clipPath = undefined;
 
               // Size
-              fc.width = sizes[0]!;
-              fc.height = sizes[1]!;
+              fc.setDimensions({ width: sizes[0]!, height: sizes[1]! });
               fc.absolutePan(new fabric.Point(0, 0));
 
               this.originalWidth = sizes[2];
@@ -768,7 +767,8 @@ export class EOImageEditor extends HTMLElement {
           } else {
             const hCenter =
               (fc.width / hZoom - (o.width ?? 0) * (o.scaleX ?? 1)) / 2;
-            o.left = hCenter;
+            const cp = o.getPositionByOrigin("left", "top");
+            o.positionByLeftTop(new fabric.Point(hCenter, cp.y));
           }
         }
         break;
@@ -830,7 +830,8 @@ export class EOImageEditor extends HTMLElement {
           } else {
             const vCenter =
               (fc.height / vZoom - (o.height ?? 0) * (o.scaleY ?? 1)) / 2;
-            o.top = vCenter;
+            const cp = o.getPositionByOrigin("left", "top");
+            o.positionByLeftTop(new fabric.Point(cp.x, vCenter));
           }
         }
         break;
@@ -885,8 +886,11 @@ export class EOImageEditor extends HTMLElement {
       return;
 
     const zoom = fc.getZoom();
-    fc.setWidth(this.originalWidth * zoom);
-    fc.setHeight(this.originalHeight * zoom);
+
+    fc.setDimensions({
+      width: this.originalWidth * zoom,
+      height: this.originalHeight * zoom
+    });
 
     this.updateSize();
   }
@@ -929,8 +933,8 @@ export class EOImageEditor extends HTMLElement {
           const zoom = this.fc.getZoom();
 
           if (this.fc.width == null || this.fc.height == null) return;
-          const width = (this.fc.width / zoom).toExact(0);
-          const height = (this.fc.height / zoom).toExact(0);
+          let width = (this.fc.width / zoom).toExact(0);
+          let height = (this.fc.height / zoom).toExact(0);
 
           // Ratio
           let rText = button.querySelector("span")?.innerText;
@@ -968,8 +972,6 @@ export class EOImageEditor extends HTMLElement {
           const rect = new fabric.Rect({
             width: rw,
             height: rh,
-            left: rl,
-            top: rt,
             fill: "#fff",
             opacity: 0.2,
             //fill: 'transparent',
@@ -989,6 +991,8 @@ export class EOImageEditor extends HTMLElement {
               mr: false // middle right
             });
           }
+
+          rect.positionByLeftTop(new fabric.Point(rl, rt));
 
           this.fc.add(rect);
           this.fc.bringObjectToFront(rect);
@@ -1246,11 +1250,11 @@ export class EOImageEditor extends HTMLElement {
           l.offsetX
         }" value="${shadow?.offsetX ?? 1}" min="-10" max="10" step="1"/>
   <input type="range" name="shadowOffsetY" title="${l.offsetY}" value="${
-          shadow?.offsetY ?? 1
-        }" min="-10" max="10" step="1"/>
+    shadow?.offsetY ?? 1
+  }" min="-10" max="10" step="1"/>
   <input type="range" name="shadowBlur" title="${l.blur}" value="${
-          shadow?.blur ?? 0
-        }" min="0" max="15" step="1"/>`
+    shadow?.blur ?? 0
+  }" min="0" max="15" step="1"/>`
       : "";
 
     const layout = `<label><span>${
@@ -1262,26 +1266,26 @@ export class EOImageEditor extends HTMLElement {
         </label><label><span>${
           l.fontWeight
         }:</span><input type="range" name="fontWeight" value="${
-      o?.fontWeight ?? 100
-    }" min="100" max="1000" step="100"/></label>
+          o?.fontWeight ?? 100
+        }" min="100" max="1000" step="100"/></label>
         <label><span>${
           l.opacity
         }:</span><input type="range" name="opacity" value="${
-      o?.opacity ?? 1
-    }" min="0.1" max="1" step="0.1"/></label>
+          o?.opacity ?? 1
+        }" min="0.1" max="1" step="0.1"/></label>
         <label><span>${
           l.padding
         }:</span><input type="number" name="padding" value="${
-      o?.padding ?? 0
-    }" min="0" max="100" step="1"/></label>
+          o?.padding ?? 0
+        }" min="0" max="100" step="1"/></label>
         <label><span>${l.color}:</span><input type="text" name="fill" value="${
-      o?.fill ?? "#000"
-    }"/></label>
+          o?.fill ?? "#000"
+        }"/></label>
         <label><span>${
           l.bgColor
         }:</span><input type="text" name="bgColor" value="${
-      o?.backgroundColor ?? ""
-    }"/></label>
+          o?.backgroundColor ?? ""
+        }"/></label>
         <label><input type="checkbox" name="italic"${
           o?.fontStyle === "italic" ? " checked" : ""
         }/>${l.italic}</label>
@@ -1488,51 +1492,34 @@ export class EOImageEditor extends HTMLElement {
     o.setCoords();
 
     const i = this.image;
-    // Main image
-    if (o == i) {
-      const w = i.width ?? 0;
-      const h = i.height ?? 0;
-      if (na === 90 || na === 270) {
-        this.fc?.setDimensions({
-          width: h,
-          height: w
-        });
 
+    // Main image
+    const fc = this.fc;
+    if (o == i && fc != null) {
+      const w = i.width;
+      const h = i.height;
+
+      const cw = fc.width;
+      const ch = fc.height;
+
+      fc.setDimensions({
+        width: ch,
+        height: cw
+      });
+
+      if (na === 90 || na === 270) {
         if (na === 90) {
-          this.image?.setPositionByOrigin(
-            new fabric.Point(h, 0),
-            "left",
-            "top"
-          );
+          i.positionByLeftTop(new fabric.Point(h, 0));
         } else {
-          this.image?.setPositionByOrigin(
-            new fabric.Point(0, w),
-            "left",
-            "top"
-          );
+          i.positionByLeftTop(new fabric.Point(0, w));
         }
       } else {
-        this.fc?.setDimensions({
-          width: w,
-          height: h
-        });
-
         if (na === 0) {
-          this.image?.setPositionByOrigin(
-            new fabric.Point(0, 0),
-            "left",
-            "top"
-          );
+          i.positionByLeftTop(new fabric.Point(0, 0));
         } else {
-          this.image?.setPositionByOrigin(
-            new fabric.Point(w, h),
-            "left",
-            "top"
-          );
+          i.positionByLeftTop(new fabric.Point(w, h));
         }
       }
-
-      this.updateSize();
     }
   }
 
@@ -1557,6 +1544,10 @@ export class EOImageEditor extends HTMLElement {
 
     image.selectable = false;
     image.hoverCursor = "default";
+
+    // 7 breaking change, object is positioned by its center by default
+    image.setPositionByOrigin(new fabric.Point(0, 0), "left", "top");
+
     this.fc.add(image);
 
     this.image = image;
@@ -1615,7 +1606,7 @@ export class EOImageEditor extends HTMLElement {
       this.imageSize();
     }
 
-    this.hidden = false;
+    this.style.visibility = "visible";
   }
 
   private imageSize() {
@@ -1685,7 +1676,7 @@ export class EOImageEditor extends HTMLElement {
     this.settings.innerHTML = "";
     this.fc?.dispose();
     this.fc = undefined;
-    this.hidden = true;
+    this.style.visibility = "hidden";
     this.container.style.visibility = "hidden";
     this.history?.clear();
     this.history = undefined;
@@ -2042,11 +2033,10 @@ export class EOImageEditor extends HTMLElement {
 
     this.fcSize = [w, h];
 
-    this.modalDiv.querySelector<HTMLDivElement>(
-      ".size-indicator"
-    )!.innerHTML = `${NumberUtils.format(w.toExact(0))} x ${NumberUtils.format(
-      h.toExact(0)
-    )} px`;
+    this.modalDiv.querySelector<HTMLDivElement>(".size-indicator")!.innerHTML =
+      `${NumberUtils.format(w.toExact(0))} x ${NumberUtils.format(
+        h.toExact(0)
+      )} px`;
 
     const c = this.container.getBoundingClientRect();
     this.containerRect = c;

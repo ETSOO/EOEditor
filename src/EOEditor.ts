@@ -742,7 +742,9 @@ export class EOEditor extends HTMLElement implements IEOEditor {
     this.innerHTML = ""; // Clear the textContent to avoid duplication
 
     doc.body.innerHTML = this.content ?? "";
-    this.content = undefined; // Clear the content
+
+    // Clear the content from memory
+    this._content = undefined;
 
     if (doc.body.contentEditable !== "true") {
       // Default styles
