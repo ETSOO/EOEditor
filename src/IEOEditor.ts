@@ -29,7 +29,7 @@ export interface IEOEditorClickedButton {
 /**
  * EOEditor interface
  */
-export interface IEOEditor {
+export interface IEOEditor extends HTMLElement {
   /**
    * Is the editor content from backup
    */
