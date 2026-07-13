@@ -13,7 +13,6 @@ import {
   EOEditorLabelLanguage
 } from "./classes/EOEditorLabels";
 import { EOPopup } from "./components/EOPopup";
-import { EOButton } from "./components/EOButton";
 import {
   EOEditorCharacters,
   EOEditorCharacterType
@@ -23,6 +22,7 @@ import { DomUtils, EColor, ExtendUtils, Utils } from "@etsoo/shared";
 import { VirtualTable } from "./classes/VirtualTable";
 import { EOPalette } from "./components/EOPalette";
 import styles from "./EOEditor.css";
+import { EOEditorDefine } from "./EOEditorDefine";
 
 const lockClass = "eo-lock";
 
@@ -3297,9 +3297,4 @@ export class EOEditor extends HTMLElement implements IEOEditor {
   }
 }
 
-// Custom element - Reusable Web Component
-customElements.get("eo-button") ||
-  customElements.define("eo-button", EOButton, { extends: "button" });
-customElements.get("eo-image-editor") ||
-  customElements.define("eo-image-editor", EOImageEditor);
-customElements.get("eo-editor") || customElements.define("eo-editor", EOEditor);
+EOEditorDefine();
