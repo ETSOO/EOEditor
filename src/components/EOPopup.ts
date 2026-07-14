@@ -66,10 +66,15 @@ export class EOPopup extends HTMLElement {
       }
     }
 
+    // Top
+    let top = (insideIFrame ? 0 : window.scrollY) + rect.top + 2;
+    if (top + prect.height > maxHeight) {
+      top -= maxHeight - prect.height;
+      if (top < 0) top = 0;
+    }
+
     this.style.left = `${(insideIFrame ? 0 : window.scrollX) + left}px`;
-    this.style.top = `${
-      (insideIFrame ? 0 : window.scrollY) + rect.bottom + 2
-    }px`;
+    this.style.top = `${top}px`;
   }
 
   private clickHandler(event: MouseEvent) {

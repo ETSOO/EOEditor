@@ -3,9 +3,11 @@
   --color-active-bg: RGBA(48, 58, 178, 0.2);
   --color-hover-bg: RGBA(48, 58, 178, 0.05);
   --color-active: RGB(48, 58, 178);
-  --width: auto;
+  --width: 100%;
   --height: 60vh;
   --radius: 4px;
+  display: block;
+  box-sizing: border-box;
   user-select: none;
 }
 
